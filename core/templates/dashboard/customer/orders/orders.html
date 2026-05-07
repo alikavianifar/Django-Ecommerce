@@ -1,0 +1,350 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Orders Tab -->
+<div class="tab-pane fade show active" id="orders">
+    <div class="section-header" data-aos="fade-up">
+        <h2>Orders ({{total_items}})</h2>
+        <div class="header-actions">
+
+    <div class="search-box">
+        <div class="filter-item search-form">
+            <form method="get">
+                {% for key, value in request.GET.items %}
+                    {% if key != "q" %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
+                <div class="input-group">
+                    <input type="text" class="form-control" id="productSearch" name="q"
+                        value="{{ request.GET.q|default_if_none:'' }}"
+                        placeholder="Search for products..." aria-label="Search for products">
+                    <button style="padding-bottom: 44px;" class="btn search-btn btn-add-new" type="submit"><i class="bi bi-search text-white"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="dropdown">
+        <button class="filter-btn" data-bs-toggle="dropdown">
+            <i class="bi bi-funnel"></i>
+            <span>Filter</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item {% if not request.GET.status %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'status' %}{{ key }}={{ value }}&{% endif %}{% endfor %}">
+                   All Orders
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {% if request.GET.status == '1' %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'status' %}{{ key }}={{ value }}&{% endif %}{% endfor %}status=1">
+                   Pending
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {% if request.GET.status == '2' %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'status' %}{{ key }}={{ value }}&{% endif %}{% endfor %}status=2">
+                   Success
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {% if request.GET.status == '3' %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'status' %}{{ key }}={{ value }}&{% endif %}{% endfor %}status=3">
+                   Failed
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="filter-btn" data-bs-toggle="dropdown">
+            <i class="bi bi-sort-down"></i>
+            <span>Sort</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item {% if not request.GET.order_by %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}">
+                   Default
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {% if request.GET.order_by == 'id' %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=id">
+                   Oldest First
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {% if request.GET.order_by == '-id' %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=-id">
+                   Newest First
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {% if request.GET.order_by == 'status' %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=status">
+                   Status (Asc)
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {% if request.GET.order_by == '-status' %}active{% endif %}"
+                   href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=-status">
+                   Status (Desc)
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</div>
+    </div>
+
+    <div class="orders-grid">
+        <!-- Order Card 1 -->
+        {% for object in object_list %}
+        <div class="order-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="order-header">
+                <div class="order-id">
+                    <span class="label">Order ID:</span>
+                    <span class="value"># ORD{{object.user.id}}-{{ object.created_date|date:"dmy-Hi" }}-{{ object.id }}</span>
+                </div>
+                <div class="order-date">{{object.created_date}}</div>
+            </div>
+            <div class="order-content">
+                <div class="product-grid">
+                    {% for order_item in object.order_items.all %}
+                    <img src="{{order_item.product.image.url}}" alt="Product" loading="lazy">
+                    {% endfor %}
+                </div>
+                <div class="order-info">
+                    <div class="info-row">
+                        <span>Status</span>
+                        {% if object.status == 2 %}
+                        <span class="status delivered">Success</span>
+                        {% elif object.status == 1 %}
+                        <span class="status processing">Pending</span>
+                        {% else %}
+                        <span class="status cancelled">Failed</span>
+                        {% endif %}
+                    </div>
+                    <div class="info-row">
+                        <span>Items</span>
+                        <span>{{object.order_items.count}} items</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Total</span>
+                        <span class="price">${{object.total_price}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="order-footer">
+                <button type="button" class="btn-track" data-bs-toggle="collapse" data-bs-target="#tracking-{{ object.id }}"
+                    aria-expanded="false">Track Order</button>
+                <button type="button" class="btn-details" data-bs-toggle="collapse" data-bs-target="#details-{{ object.id }}"
+                    aria-expanded="false">View Details</button>
+            </div>
+
+            <!-- Order Tracking -->
+            <div class="collapse tracking-info" id="tracking-{{ object.id }}">
+                <div class="tracking-timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Order Confirmed</h5>
+                            <p>Your order has been received and confirmed</p>
+                            <span class="timeline-date">Feb 20, 2026 - 10:30 AM</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item completed">
+                        <div class="timeline-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Processing</h5>
+                            <p>Your order is being prepared for shipment</p>
+                            <span class="timeline-date">Feb 20, 2026 - 2:45 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item active">
+                        <div class="timeline-icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Packaging</h5>
+                            <p>Your items are being packaged for shipping</p>
+                            <span class="timeline-date">Feb 20, 2026 - 4:15 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>In Transit</h5>
+                            <p>Expected to ship within 24 hours</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="bi bi-house-door"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Delivery</h5>
+                            <p>Estimated delivery: Feb 22, 2026</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="collapse order-details" id="details-{{ object.id }}">
+                <div class="details-content">
+                    <div class="detail-section">
+                        <h5>Order Information</h5>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="label">Payment Method</span>
+                                <span class="value">Credit Card (**** 4589)</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Shipping Method</span>
+                                <span class="value">Express Delivery (2-3 days)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h5>Items ({{object.order_items.count}})</h5>
+                        <div class="order-items">
+                            {% for order_item in object.order_items.all %}
+                            <div class="item">
+                                {{forloop.counter}}
+                                <img src="{{order_item.product.image.url}}" alt="Product" loading="lazy">
+                                <div class="item-info">
+                                    <h6>{{order_item.product.title}}</h6>
+                                    <div class="item-meta">
+                                        <span class="sku">SKU: PRD-{{order_item.product.id}}</span>
+                                        <span class="qty">Qty: {{order_item.quantity}}</span>
+                                    </div>
+                                </div>
+                                <div class="item-price">${{order_item.price}}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h5>Price Details</h5>
+                        <div class="price-breakdown">
+                            <div class="price-row">
+                                <span>Subtotal</span>
+                                <span>${{ object.calculate_total_price }}</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Shipping</span>
+                                <span>$0.00</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Tax (10%)</span>
+                                <span>${{object.calculate_tax_price}}</span>
+                            </div>
+                            <div class="price-row">
+                                {% if object.coupon %}
+                                <span>Coupon</span>
+                                    <span>%{{object.coupon.discount_percent}}</span>
+                                {% endif %}
+                            </div>
+                            <div class="price-row total">
+                                <span>Total</span>
+                                <span>${{object.total_price}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h5>Shipping Address</h5>
+                        <div class="address-info">
+                            <p>{{object.user.user_profile.get_fullname}}<br>{{object.get_full_address}}<br>Zip Code: {{object.zip_code}}</p>
+                            <p class="contact">{{object.user.user_profile.phone_number}}</p>
+                        </div>
+                    </div>
+                    {% if object.is_successful %}
+                    <a href="{% url 'dashboard:customer:order-invoice' pk=object.pk %}" class="btn btn-add-new pt-2">Invoice</a>
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+      
+      <section id="category-pagination" class="category-pagination section">
+        <div class="container">
+          <nav class="d-flex justify-content-center" aria-label="Page navigation">
+            <ul>
+
+              {# Previous Page #}
+              {% if page_obj.has_previous %}
+                <li>
+                  <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                    <i class="bi bi-arrow-left"></i>
+                    <span class="d-none d-sm-inline">Previous</span>
+                  </a>
+                </li>
+              {% endif %}
+
+              {# Show first page and ellipsis if needed #}
+              {% if page_obj.number > 3 %}
+                <li><a href="?page=1">1</a></li>
+                {% if page_obj.number > 4 %}
+                  <li class="ellipsis">...</li>
+                {% endif %}
+              {% endif %}
+
+              {# Pages around current page #}
+              {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                  {% if num == page_obj.number %}
+                    <li><a href="?page={{ num }}&view={{ view_mode }}" class="active">{{ num }}</a></li>
+                  {% else %}
+                    <li><a href="?page={{ num }}&view={{ view_mode }}">{{ num }}</a></li>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              {# Show ellipsis and last page if needed #}
+              {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                  <li class="ellipsis">...</li>
+                {% endif %}
+                <li><a href="?page={{ page_obj.paginator.num_pages }}&view={{ view_mode }}">{{ page_obj.paginator.num_pages }}</a></li>
+              {% endif %}
+
+              {# Next Page #}
+              {% if page_obj.has_next %}
+                <li>
+                  <a href="?page={{ page_obj.next_page_number }}&view={{ view_mode }}" aria-label="Next page">
+                    <span class="d-none d-sm-inline">Next</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                </li>
+              {% endif %}
+
+            </ul>
+          </nav>
+        </div>
+      </section>
+      {% endif %}
+</div>
+{% endblock %}

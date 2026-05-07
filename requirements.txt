@@ -1,0 +1,9 @@
+django>=4.2,<4.3
+psycopg[binary]==3.2.9
+python-decouple==3.8
+django-debug-toolbar==5.2.0
+phonenumbers==9.0.5
+pillow==11.2.1
+Faker==37.8.0
+stripe==14.3.0
+django-ratelimit==4.1.0

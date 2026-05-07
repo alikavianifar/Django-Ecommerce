@@ -1,0 +1,144 @@
+{% load static %}
+
+{% block extra_css %}
+<style>
+.settings-dropdown .submenu {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .settings-dropdown:hover .submenu {
+        display: block;
+    }
+}
+
+@media (max-width: 991px) {
+    .settings-dropdown.open .submenu {
+        display: block;
+    }
+}
+
+.settings-dropdown .submenu .nav-link {
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="col-lg-3">
+    <div class="profile-menu collapse d-lg-block" id="profileMenu">
+        <!-- User Info -->
+        <div class="user-info" data-aos="fade-right">
+            <div class="user-avatar">
+                <img src="{{request.user.user_profile.image.url}}" alt="Profile" loading="lazy">
+                <span class="status-badge"><i class="bi bi-shield-check"></i></span>
+            </div>
+            <h4>{{profile.get_fullname}}</h4>
+            <div class="user-status">
+                <i class="bi bi-award"></i>
+                <span>{{ user.get_type_display }}</span>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="menu-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:admin:home' %}">
+                        <i class="bi bi-speedometer"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:admin:orders-list' %}">
+                        <i class="bi bi-bag"></i>
+                        <span>Orders</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:admin:products-list' %}">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Products</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:admin:review-list' %}">
+                        <i class="bi bi-star"></i>
+                        <span>Reviews</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:admin:customers-list' %}">
+                        <i class="bi bi-people"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:admin:coupon-list' %}">
+                        <i class="bi bi-ticket-perforated"></i>
+                        <span>Coupons</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:admin:messages-list' %}">
+                        <i class="bi bi-envelope"></i>
+                        <span>Messages</span>
+                    </a>
+                </li>
+                <li class="nav-item settings-dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="settingsToggle">
+                        <i class="bi bi-gear"></i>
+                        <span>Account Settings</span>
+                    </a>
+
+                    <ul class="submenu nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard:admin:settings-personal-information' %}">
+                                <span>Personal Information</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard:admin:settings-change-password' %}">
+                                <span>Change Password</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+
+            <div class="menu-footer">
+                <a href="#" class="help-link">
+                    <i class="bi bi-question-circle"></i>
+                    <span>Help Center</span>
+                </a>
+                <a href="{% url 'accounts:logout' %}" class="logout-link">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("settingsToggle");
+
+    if (toggle) {
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            if (window.innerWidth < 992) {
+                this.parentElement.classList.toggle("open");
+            }
+        });
+    }
+});
+</script>
+{% endblock extra_js %}

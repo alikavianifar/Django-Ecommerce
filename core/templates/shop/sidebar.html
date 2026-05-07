@@ -1,0 +1,127 @@
+{% load static %}
+<div class="widgets-container">
+
+  <!-- Product Categories Widget -->
+  <div class="product-categories-widget widget-item">
+    <h4 class="text-center">{{total_items}} Products</h4>
+    <hr>
+
+    <ul class="category-tree list-unstyled mb-0">
+      <!-- Clothing Category -->
+      <li class="category-item">
+
+        <h3 class="widget-title">Categories</h3>
+
+        <ul id="categories-1-clothing-subcategories" class="subcategory-list list-unstyled ps-3 mt-2">
+          {% for category in categories %}
+          <li>
+            <form method="get" class="d-inline">
+              {% for key, value in request.GET.items %}
+              {% if key != 'category_id' %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}">
+              {% endif %}
+              {% endfor %}
+              <input type="hidden" name="category_id" value="{{ category.id }}">
+              <button type="submit"
+                class="subcategory-link d-flex justify-content-between w-100 btn btn-link p-0 text-start">
+                <span class="category-title">{{ category.title }}</span>
+                <span class="category-count">({{ category.product_count }})</span>
+              </button>
+
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+
+    </ul>
+  </div><!--/Product Categories Widget -->
+
+  <!-- Pricing Range Widget -->
+  <div class="pricing-range-widget widget-item">
+    <h3 class="widget-title">Price Range</h3>
+
+    <form method="get" id="price-range-form">
+      {% for key, value in request.GET.items %}
+      {% if key != 'min_price' and key != 'max_price' %}
+      <input type="hidden" name="{{ key }}" value="{{ value }}">
+      {% endif %}
+      {% endfor %}
+      <div class="price-range-container">
+
+        <div class="current-range mb-3">
+          <span class="min-price">$0</span>
+          <span class="max-price float-end">$10000</span>
+        </div>
+
+        <div class="range-slider">
+          <div class="slider-track"></div>
+          <div class="slider-progress"></div>
+
+          <input type="range" class="min-range" min="0" max="15000" value="0" step="100">
+          <input type="range" class="max-range" min="0" max="15000" value="7500" step="100">
+        </div>
+
+        <div class="price-inputs mt-3">
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input type="number" name="min_price" class="form-control min-price-input" placeholder="Min" min="0"
+                  max="100000" value="{{ request.GET.min_price|default_if_none:'' }}" step="10">
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input type="number" name="max_price" class="form-control max-price-input" placeholder="Max" min="0"
+                  max="100000" value="{{ request.GET.max_price|default_if_none:'' }}" step="10">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-actions mt-3">
+          <button type="submit" class="btn btn-sm btn-primary w-100">Apply Filter</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+  <!-- /Pricing Range Widget -->
+
+  <!-- Product Brands Widget -->
+  <div class="product-categories-widget widget-item">
+
+    <ul class="category-tree list-unstyled mb-0">
+      <!-- Clothing Category -->
+      <li class="category-item">
+
+        <h3 class="widget-title">‌Brands</h3>
+
+        <ul id="categories-1-clothing-subcategories" class="subcategory-list list-unstyled ps-3 mt-2">
+          {% for brand in brands %}
+          <li>
+            <form method="get" class="d-inline">
+              {% for key, value in request.GET.items %}
+              {% if key != 'brand_id' %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}">
+              {% endif %}
+              {% endfor %}
+              <input type="hidden" name="brand_id" value="{{ brand.id }}">
+              <button type="submit"
+                class="subcategory-link d-flex justify-content-between w-100 btn btn-link p-0 text-start">
+                <span class="category-title">{{ brand.name }}</span>
+                <span class="category-count">({{ brand.product_count }})</span>
+              </button>
+            </form>
+
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+
+    </ul>
+  </div><!--/Product Categories Widget -->
+
+</div>

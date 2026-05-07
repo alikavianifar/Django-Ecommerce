@@ -1,0 +1,358 @@
+{% extends 'dashboard/admin/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Customers Tab -->
+<div class="tab-pane fade show active" id="customers">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Customers ({{total_items}})</h2>
+    <div class="header-actions">
+
+      <a href="{% url 'dashboard:admin:export-customers-csv' %}" class="btn btn-add-new pt-2 me-5" title="Export CSV">
+        <i class="bi bi-download"></i> CSV
+      </a>
+
+      <div class="search-box ms-3">
+        <div class="filter-item search-form">
+          <form method="get">
+            {% for key, value in request.GET.items %}
+            {% if key != "q" %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+            {% endfor %}
+            <div class="input-group">
+              <input type="text" class="form-control" id="customerSearch" name="q"
+                value="{{ request.GET.q|default_if_none:'' }}" placeholder="Search by name, email, phone..."
+                aria-label="Search customers">
+              <button style="padding-bottom: 44px;" class="btn search-btn btn-add-new" type="submit"><i
+                  class="bi bi-search text-white"></i></button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Role Filter -->
+      <div class="dropdown">
+        <button class="filter-btn" data-bs-toggle="dropdown">
+          <i class="bi bi-person-badge"></i>
+          <span>Role</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item {% if not request.GET.type %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'type' %}{{ key }}={{ value }}&{% endif %}{% endfor %}">
+              All Roles
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.type == '1' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'type' %}{{ key }}={{ value }}&{% endif %}{% endfor %}type=1">
+              Customer
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.type == '2' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'type' %}{{ key }}={{ value }}&{% endif %}{% endfor %}type=2">
+              Admin
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Verified Filter -->
+      <div class="dropdown">
+        <button class="filter-btn" data-bs-toggle="dropdown">
+          <i class="bi bi-envelope-check"></i>
+          <span>Verified</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item {% if not request.GET.verified %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'verified' %}{{ key }}={{ value }}&{% endif %}{% endfor %}">
+              All
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.verified == '1' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'verified' %}{{ key }}={{ value }}&{% endif %}{% endfor %}verified=1">
+              Verified
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.verified == '0' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'verified' %}{{ key }}={{ value }}&{% endif %}{% endfor %}verified=0">
+              Not Verified
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="dropdown">
+        <button class="filter-btn" data-bs-toggle="dropdown">
+          <i class="bi bi-shield-check"></i>
+          <span>Status</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item {% if not request.GET.is_active %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'is_active' %}{{ key }}={{ value }}&{% endif %}{% endfor %}">
+              All
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.is_active == '1' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'is_active' %}{{ key }}={{ value }}&{% endif %}{% endfor %}is_active=1">
+              Active
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.is_active == '0' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'is_active' %}{{ key }}={{ value }}&{% endif %}{% endfor %}is_active=0">
+              Inactive
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sort -->
+      <div class="dropdown">
+        <button class="filter-btn" data-bs-toggle="dropdown">
+          <i class="bi bi-sort-down"></i>
+          <span>Sort</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item {% if not request.GET.order_by %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}">
+              Default
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.order_by == '-created_date' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=-created_date">
+              Newest First
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.order_by == 'created_date' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=created_date">
+              Oldest First
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.order_by == 'email' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=email">
+              Email (A-Z)
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item {% if request.GET.order_by == '-email' %}active{% endif %}"
+              href="?{% for key, value in request.GET.items %}{% if key != 'order_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}order_by=-email">
+              Email (Z-A)
+            </a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="table-responsive-xl w-100">
+    <table class="table table-hover text-center">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Full Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Phone</th>
+          <th scope="col">Role</th>
+          <th scope="col">Verified</th>
+          <th scope="col">Status</th>
+          <th scope="col">Joined</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in object_list %}
+        <tr id="customer-row-{{customer.pk}}">
+          <td>{{forloop.counter}}</td>
+          <td>{{customer.user_profile.get_fullname}}</td>
+          <td>{{customer.email}}</td>
+          <td>{{customer.user_profile.phone_number|default:"-"}}</td>
+          <td>
+            {% if customer.type == 2 %}
+            <span class="badge bg-primary">Admin</span>
+            {% else %}
+            <span class="badge bg-secondary">Customer</span>
+            {% endif %}
+          </td>
+          <td>
+            <button
+              class="btn btn-sm toggle-verified-btn {% if customer.is_verified %}btn-outline-success{% else %}btn-outline-danger{% endif %}"
+              data-pk="{{customer.pk}}" data-url="{% url 'dashboard:admin:customer-toggle-verified' pk=customer.pk %}"
+              title="Click to toggle verified status">
+              {% if customer.is_verified %}
+              <i class="bi bi-check-circle-fill"></i> Yes
+              {% else %}
+              <i class="bi bi-x-circle-fill"></i> No
+              {% endif %}
+            </button>
+          </td>
+          <td>
+            <button
+              class="btn btn-sm toggle-active-btn {% if customer.is_active %}btn-outline-success{% else %}btn-outline-danger{% endif %}"
+              data-pk="{{customer.pk}}" data-url="{% url 'dashboard:admin:customer-toggle-active' pk=customer.pk %}"
+              title="Click to toggle active status">
+              {% if customer.is_active %}
+              <i class="bi bi-check-circle"></i> Active
+              {% else %}
+              <i class="bi bi-x-circle"></i> Inactive
+              {% endif %}
+            </button>
+          </td>
+          <td>{{customer.created_date|date:"Y.m.d"}}</td>
+          <td>
+            <div class="btn-group" role="group">
+              <a href="{% url 'dashboard:admin:customer-detail' pk=customer.pk %}" class="btn btn-sm border-0"
+                title="View Details">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{% url 'dashboard:admin:customer-edit' pk=customer.pk %}" class="btn btn-sm border-0"
+                title="Edit Customer">
+                <i class="bi bi-pencil"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-muted py-4">No customers found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+
+  <section id="category-pagination" class="category-pagination section">
+    <div class="container">
+      <nav class="d-flex justify-content-center" aria-label="Page navigation">
+        <ul>
+
+          {# Previous Page #}
+          {% if page_obj.has_previous %}
+          <li>
+            <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+              <i class="bi bi-arrow-left"></i>
+              <span class="d-none d-sm-inline">Previous</span>
+            </a>
+          </li>
+          {% endif %}
+
+          {# Show first page and ellipsis if needed #}
+          {% if page_obj.number > 3 %}
+          <li><a href="?page=1">1</a></li>
+          {% if page_obj.number > 4 %}
+          <li class="ellipsis">...</li>
+          {% endif %}
+          {% endif %}
+
+          {# Pages around current page #}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+              {% if num == page_obj.number %}
+                <li><a href="?page={{ num }}" class="active">{{ num }}</a></li>
+              {% else %}
+                <li><a href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          {# Show ellipsis and last page if needed #}
+          {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+            {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+              <li class="ellipsis">...</li>
+            {% endif %}
+            <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+          {% endif %}
+
+              {# Next Page #}
+              {% if page_obj.has_next %}
+              <li>
+                <a href="?page={{ page_obj.next_page_number }}" aria-label="Next page">
+                  <span class="d-none d-sm-inline">Next</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </li>
+              {% endif %}
+
+        </ul>
+      </nav>
+    </div>
+  </section>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const csrfToken = "{{ csrf_token }}";
+
+    // Toggle Active
+    document.querySelectorAll(".toggle-active-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const url = this.dataset.url;
+        const button = this;
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.is_active) {
+              button.className = "btn btn-sm toggle-active-btn btn-outline-success";
+              button.innerHTML = '<i class="bi bi-check-circle"></i> Active';
+            } else {
+              button.className = "btn btn-sm toggle-active-btn btn-outline-danger";
+              button.innerHTML = '<i class="bi bi-x-circle"></i> Inactive';
+            }
+          });
+      });
+    });
+
+    // Toggle Verified
+    document.querySelectorAll(".toggle-verified-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const url = this.dataset.url;
+        const button = this;
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.is_verified) {
+              button.className = "btn btn-sm toggle-verified-btn btn-outline-success";
+              button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Yes';
+            } else {
+              button.className = "btn btn-sm toggle-verified-btn btn-outline-danger";
+              button.innerHTML = '<i class="bi bi-x-circle-fill"></i> No';
+            }
+          });
+      });
+    });
+  });
+</script>
+{% endblock %}

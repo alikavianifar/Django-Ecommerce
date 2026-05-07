@@ -1,0 +1,69 @@
+  .alert,
+  .alert li {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+  }
+
+  .alert {
+      display: flex;
+      margin: 1rem 0;
+      padding-top: 12px;
+      border-radius: 12px;
+      position: relative;
+      font-size: 1rem;
+      line-height: 1.5;
+      animation: fadeIn 0.5s ease-in-out;
+      animation-delay: 0.5s;
+      animation-fill-mode: both;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+  }
+
+  .alert-success {
+      background-color: #e6f9f0;
+      color: #1e7e34;
+  }
+
+  .alert-error,
+  .alert-danger {
+      background-color: #ffe6e6;
+      color: #cc0000;
+  }
+
+  .alert-warning {
+      background-color: #fff9e6;
+      color: #8e6d00;
+  }
+
+  .alert-info {
+      background-color: #e6f0ff;
+      color: #2c3e50;
+  }
+
+  .alert-error a.error {
+      display: block;
+      color: #c0392b;
+      text-decoration: none;
+      margin: 0.3rem 0;
+      padding: 0.4rem 0.6rem;
+      background-color: #fcecec;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+  }
+
+  .alert-error a.error:hover {
+      background-color: #f8d7da;
+  }
+
+  @keyframes fadeIn {
+      from {
+          opacity: 0;
+          transform: translateY(-6px);
+      }
+
+      to {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }

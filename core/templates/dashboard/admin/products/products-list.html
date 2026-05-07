@@ -1,0 +1,318 @@
+{% extends 'dashboard/admin/base.html' %}
+{% load static %}
+{% load humanize %}
+
+
+{% block content %}
+<!-- Products Tab -->
+<div class="section-header" data-aos="fade-up">
+  <h2>Products ({{total_items}})</h2>
+  <a href="{% url 'dashboard:admin:export-products-csv' %}" class="btn btn-add-new btn-sm pt-2" title="Export CSV"><i class="bi bi-download"></i> CSV</a>
+  <a href="{% url 'dashboard:admin:product-create' %}" class="btn btn-add-new pt-2"><i class="bi bi-plus-lg"></i> New Product</a>
+
+  <div class="header-actions">
+    <section id="category-header" class="category-header section">
+      <div class="container" data-aos="fade-up">
+          <!-- Filter and Sort Options -->
+          <div class="filter-container mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="row g-2">
+                <div class="col-12 col-md-6 col-lg-12">
+                  <div class="filter-item search-form">
+                      <form method="get">
+                      {% for key, value in request.GET.items %}
+                          {% if key != "q" %}
+                          <input type="hidden" name="{{ key }}" value="{{ value }}">
+                          {% endif %}
+                      {% endfor %}
+                      <label for="productSearch" class="form-label">Search Products</label>
+                      <div class="input-group">
+                          <input type="text" class="form-control" id="productSearch" name="q"
+                              value="{{ request.GET.q|default_if_none:'' }}"
+                              placeholder="Search for products..." aria-label="Search for products">
+                          <button class="btn search-btn" type="submit">
+                          <i class="bi bi-search"></i>
+                          </button>
+                      </div>
+                      </form>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-2">
+                <div class="filter-item">
+                    <form method="get">
+                    {% for key, value in request.GET.items %}
+                        {% if key != "price_range" %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                    {% endfor %}
+                    <label for="priceRange" class="form-label">Price Range</label>
+                    <select class="form-select" id="priceRange" name="price_range" onchange="this.form.submit()">
+                        <option value="" {% if not request.GET.price_range %}selected{% endif %}>All Prices</option>
+                        <option value="0-25" {% if request.GET.price_range == "0-25" %}selected{% endif %}>Under $25</option>
+                        <option value="25-50" {% if request.GET.price_range == "25-50" %}selected{% endif %}>$25 to $50</option>
+                        <option value="50-100" {% if request.GET.price_range == "50-100" %}selected{% endif %}>$50 to $100</option>
+                        <option value="100-200" {% if request.GET.price_range == "100-200" %}selected{% endif %}>$100 to $200</option>
+                        <option value="200-15000" {% if request.GET.price_range == "200-15000" %}selected{% endif %}>$200 &amp; Above</option>
+                    </select>
+                    </form>
+                </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                <form method="get">
+                    {% for key, value in request.GET.items %}
+                    {% if key != "order_by" %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                    {% endfor %}
+                    <div class="filter-item">
+                    <label for="sortBy" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortBy" name="order_by" onchange="this.form.submit()">
+                        <option value="" {% if not request.GET.order_by %}selected{% endif %}>Newest</option>
+                        <option value="-price" {% if request.GET.order_by == "-price" %}selected{% endif %}>Price: High to Low</option>
+                        <option value="price" {% if request.GET.order_by == "price" %}selected{% endif %}>Price: Low to High</option>
+                    </select>
+                    </div>
+                </form>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                  <div class="filter-item">
+                    <form method="get">
+                      {% for key, value in request.GET.items %}
+                        {% if key != "category_id" %}
+                          <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                      {% endfor %}
+
+                      <label for="categoryFilter" class="form-label">Category</label>
+                      <select class="form-select" id="categoryFilter" name="category_id" onchange="this.form.submit()">
+                        <option value="" {% if not request.GET.category_id %}selected{% endif %}>All Categories</option>
+                        {% for cat in categories %}
+                          <option value="{{ cat.id }}" {% if request.GET.category_id == cat.id|stringformat:"s" %}selected{% endif %}>
+                            ({{ cat.product_count }}) {{ cat.title }} 
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </form>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-2">
+                  <div class="filter-item">
+                    <form method="get">
+                      {% for key, value in request.GET.items %}
+                        {% if key != "brand_id" %}
+                          <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                      {% endfor %}
+
+                      <label for="brandFilter" class="form-label">Brand</label>
+                      <select class="form-select" id="brandFilter" name="brand_id" onchange="this.form.submit()">
+                        <option value="" {% if not request.GET.brand_id %}selected{% endif %}>All Brands</option>
+                        {% for brand in brands %}
+                          <option value="{{ brand.id }}" {% if request.GET.brand_id == brand.id|stringformat:"s" %}selected{% endif %}>
+                            ({{ brand.product_count }}) {{ brand.name }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </form>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-2">
+                  <div class="filter-item">
+                      <label class="form-label">View</label>
+                      <div class="d-flex align-items-center">
+                      
+                        <div class="items-per-page">
+                            <form method="get" id="page-size-form">
+                            {% for key, value in request.GET.items %}
+                                {% if key != "page_size" %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            <select name="page_size" class="form-select" id="itemsPerPage" onchange="this.form.submit()">
+                                <option value="25" {% if request.GET.page_size == '25' %}selected{% endif %}>25 per page</option>
+                                <option value="50" {% if request.GET.page_size == '50' %}selected{% endif %}>50 per page</option>
+                                <option value="75" {% if request.GET.page_size == '75' %}selected{% endif %}>75 per page</option>
+                                <option value="100" {% if request.GET.page_size == '100' %}selected{% endif %}>100 per page</option>
+                            </select>
+                            </form>
+                        </div>
+
+                        
+
+                      </div>
+                  </div>
+                </div>
+
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-12" data-aos="fade-up" data-aos-delay="200">
+                {% if has_filters %}
+                <div class="active-filters">
+                    <span class="active-filter-label">Active Filters:</span>
+                    <div class="filter-tags">
+                      {% for filter in active_filters %}
+                          <span class="filter-tag">
+                          {{ filter.label }}
+                          <a href="?{% for key, value in request.GET.items %}{% if key != filter.param %}{{ key }}={{ value }}&{% endif %}{% endfor %}"
+                              class="filter-remove">
+                              <i class="bi bi-x"></i>
+                          </a>
+                          </span>
+                      {% endfor %}
+                      <a href="{% url 'dashboard:admin:products-list' %}" class="clear-all-btn">Clear All</a>
+                    </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="table-responsive-xl w-100">
+      <table class="table table-hover text-center">
+          <thead>
+              <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Product Title</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">%</th>
+                  <th scope="col">FinalPrice</th>
+                  <th scope="col">Stock</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for object in object_list %}
+              <tr>
+                  <th>{{object.id}}</th>
+                  <td>{{object.title}}</td>
+                  <td>{% for cat in object.category.all %}
+                      {{ cat.title }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+                  <td>{{object.price|intcomma}}</td>
+                  <td>{{object.discount|intcomma}}</td>
+                  <td>{{object.get_price|intcomma}}</td>
+                  <td>{{object.stock}}</td>
+                  <td>{% if object.is_published %} <span class="text-success">Published</span> {% else %} <span class="text-danger">Draft</span> {% endif %}</td>
+                  <td>
+                      <div class="row">
+                          <div class="col-6">
+                              <a href="{% url 'dashboard:admin:product-edit' pk=object.pk %}"><i class="bi bi-pencil-square me-3 ms-1"></i></a>
+                          </div>
+                          <div class="col-6">
+                            {% if object.is_published %}
+                              <a href="{% url 'shop:product-details' slug=object.slug %}" target="_blank"><i class="bi bi-eye"></i></a>
+                            {% else %}
+                              <i class="bi bi-eye-slash-fill" title="Draft, not visible"></i>
+                            {% endif %}
+                          </div>
+                      </div>
+                  </td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <!-- Category Pagination Section -->
+    <section id="category-pagination" class="category-pagination section">
+      <div class="container">
+        {% with request.GET.urlencode as current_query %}
+        <nav class="d-flex justify-content-center" aria-label="Page navigation">
+          <ul>
+
+            {# Previous Page #}
+            {% if page_obj.has_previous %}
+              <li>
+                <a href="?{% if current_query %}{{ current_query }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                  <i class="bi bi-arrow-left"></i>
+                  <span class="d-none d-sm-inline">Previous</span>
+                </a>
+              </li>
+            {% endif %}
+
+            {# Show first page and ellipsis if needed #}
+            {% if page_obj.number > 3 %}
+              <li>
+                <a href="?{% if current_query %}{{ current_query }}&{% endif %}page=1">1</a>
+              </li>
+              {% if page_obj.number > 4 %}
+                <li class="ellipsis">...</li>
+              {% endif %}
+            {% endif %}
+
+            {# Pages around current page #}
+            {% for num in page_obj.paginator.page_range %}
+              {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                {% if num == page_obj.number %}
+                  <li>
+                    <a href="?{% if current_query %}{{ current_query }}&{% endif %}page={{ num }}" class="active">{{ num }}</a>
+                  </li>
+                {% else %}
+                  <li>
+                    <a href="?{% if current_query %}{{ current_query }}&{% endif %}page={{ num }}">{{ num }}</a>
+                  </li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {# Show ellipsis and last page if needed #}
+            {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+              {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                <li class="ellipsis">...</li>
+              {% endif %}
+              <li>
+                <a href="?{% if current_query %}{{ current_query }}&{% endif %}page={{ page_obj.paginator.num_pages }}">
+                  {{ page_obj.paginator.num_pages }}
+                </a>
+              </li>
+            {% endif %}
+
+            {# Next Page #}
+            {% if page_obj.has_next %}
+              <li>
+                <a href="?{% if current_query %}{{ current_query }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next page">
+                  <span class="d-none d-sm-inline">Next</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </li>
+            {% endif %}
+
+          </ul>
+        </nav>
+        {% endwith %}
+      </div>
+    </section>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const buttons = document.querySelectorAll(".view-btn");
+  const viewInput = document.getElementById("view-input");
+  const form = document.getElementById("view-form");
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", function() {
+      const view = this.getAttribute("data-view");
+      viewInput.value = view;
+      const pageInput = form.querySelector('input[name="page"]');
+      if (pageInput) pageInput.remove();
+      form.submit();
+    });
+  });
+});
+</script>
+{% endblock extra_js %}

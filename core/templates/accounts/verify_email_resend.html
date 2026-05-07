@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="login-register" class="login-register section">
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+    <div class="row justify-content-center">
+      <div class="col-lg-5">
+        <div class="login-register-wraper">
+          <h4 class="text-center mb-5">Resend verification email</h4>
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+              <input type="email" name="email" class="form-control" placeholder="Your email address" required="">
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">Send new link</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,722 @@
+{% extends 'dashboard/admin/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<style>
+  /* 
+   * NATIVE INTEGRATION PREMIUM DESIGN
+   * Using the project's native CSS variables and Bootstrap 5
+   */
+  
+  /* Enhancing the native admin card to look ultra-premium */
+  .admin-card {
+    background: color-mix(in srgb, var(--surface-color), transparent 2%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+  }
+  .admin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+    border-color: color-mix(in srgb, var(--accent-color), transparent 80%);
+  }
+  
+  .admin-card-header {
+    background: transparent;
+    border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .admin-card-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--heading-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Custom Native Utilities */
+  .text-accent { color: var(--accent-color) !important; }
+  .bg-accent-soft { 
+    background: color-mix(in srgb, var(--accent-color), transparent 85%) !important; 
+    color: var(--accent-color) !important; 
+  }
+  .bg-success-soft { background: rgba(25, 135, 84, 0.1) !important; color: #198754 !important; }
+  .bg-warning-soft { background: rgba(255, 193, 7, 0.15) !important; color: #b47a00 !important; }
+  .bg-danger-soft { background: rgba(220, 53, 69, 0.1) !important; color: #dc3545 !important; }
+  .bg-info-soft { background: rgba(13, 202, 240, 0.1) !important; color: #087990 !important; }
+
+  .icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  /* Big Metrics Typography */
+  .metric-value {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--heading-color);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .metric-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--default-color), transparent 40%);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Section Dividers */
+  .dashboard-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--heading-color);
+    margin: 2.5rem 0 1.5rem 0;
+    position: relative;
+    padding-left: 1rem;
+  }
+  .dashboard-section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 4px;
+  }
+
+  /* Custom Native Progress Bar */
+  .native-progress {
+    height: 8px;
+    background: color-mix(in srgb, var(--default-color), transparent 90%);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .native-progress-bar {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease;
+  }
+
+  /* Lists inside Cards */
+  .admin-list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .admin-list-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 93%);
+    transition: background 0.2s;
+  }
+  .admin-list-item:hover {
+    background: color-mix(in srgb, var(--default-color), transparent 97%);
+  }
+  .admin-list-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Dashboard Action Buttons */
+  .btn-native-action {
+    background: color-mix(in srgb, var(--surface-color), transparent 10%);
+    border: 1px solid color-mix(in srgb, var(--default-color), transparent 80%);
+    color: var(--heading-color);
+    font-weight: 700;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s;
+  }
+  .btn-native-action:hover {
+    background: var(--accent-color);
+    color: var(--contrast-color, #fff);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-color), transparent 70%);
+  }
+</style>
+
+<div class="tab-pane fade show active" id="dashboard">
+  
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-3">
+    <div>
+      <h1 class="fw-bold mb-1" style="color: var(--heading-color); font-size: 2.2rem; letter-spacing: -0.5px;">Analytics Console</h1>
+      <p class="text-muted fw-medium mb-0">Live business insights for <span class="text-dark fw-bold">{{request.user.user_profile.get_fullname}}</span>.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'dashboard:admin:product-create' %}" class="btn-native-action text-decoration-none">
+        <i class="bi bi-plus-circle me-1"></i> Add Product
+      </a>
+      <a href="{% url 'dashboard:admin:coupon-create' %}" class="btn-native-action text-decoration-none">
+        <i class="bi bi-tag-fill me-1"></i> New Coupon
+      </a>
+    </div>
+  </div>
+
+  <div class="dashboard-section-title">Key Performance Indicators</div>
+
+  <!-- ROW 1: Macro Metrics (Compact 1x4 Grid) -->
+  <div class="row g-3 mb-4">
+    <!-- Revenue -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="admin-card p-3 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="metric-label" style="font-size: 0.75rem;">Total Revenue</div>
+          <div class="icon-box bg-success-soft" style="width: 38px; height: 38px; font-size: 1.1rem;"><i class="bi bi-currency-dollar"></i></div>
+        </div>
+        <div class="metric-value counter flex-grow-1" style="font-size: 1.7rem;" data-target="{{total_revenue}}">${{total_revenue|floatformat:2|intcomma}}</div>
+        <div class="mt-3 pt-2 border-top w-100" style="border-color: color-mix(in srgb, var(--default-color), transparent 90%) !important;">
+          <div class="d-flex justify-content-between align-items-center" style="font-size: 0.75rem;">
+            <span class="text-muted fw-bold">This Month:</span>
+            <span class="text-success fw-bold">+${{this_month_revenue|floatformat:2|intcomma}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="admin-card p-3 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="metric-label" style="font-size: 0.75rem;">Total Orders</div>
+          <div class="icon-box bg-accent-soft" style="width: 38px; height: 38px; font-size: 1.1rem;"><i class="bi bi-bag-check-fill"></i></div>
+        </div>
+        <div class="metric-value counter flex-grow-1" style="font-size: 1.7rem;" data-target="{{total_orders}}">{{total_orders|intcomma}}</div>
+        <div class="mt-3 pt-2 border-top w-100" style="border-color: color-mix(in srgb, var(--default-color), transparent 90%) !important;">
+          <div class="d-flex justify-content-between align-items-center" style="font-size: 0.75rem;">
+            <span class="text-muted fw-bold">This Month:</span>
+            <span class="text-accent fw-bold">+{{this_month_orders}} Orders</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fulfillment Split -->
+    <div class="col-xl-3 col-lg-6 col-md-12">
+      <div class="admin-card p-3 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="metric-label" style="font-size: 0.75rem;">Order Status</div>
+          <div class="icon-box bg-warning-soft" style="width: 38px; height: 38px; font-size: 1.1rem;"><i class="bi bi-box-seam"></i></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-end flex-grow-1 w-100 mb-1">
+          <div class="text-center flex-fill">
+            <div class="fw-bold text-success counter" style="font-size: 1.4rem;" data-target="{{orders_success}}">{{orders_success}}</div>
+            <div class="fw-bold text-muted mt-1" style="font-size: 0.7rem;">Success</div>
+          </div>
+          <div class="text-center flex-fill border-start border-end" style="border-color: color-mix(in srgb, var(--default-color), transparent 90%) !important;">
+            <div class="fw-bold text-warning counter" style="font-size: 1.4rem;" data-target="{{orders_pending}}">{{orders_pending}}</div>
+            <div class="fw-bold text-muted mt-1" style="font-size: 0.7rem;">Pending</div>
+          </div>
+          <div class="text-center flex-fill">
+            <div class="fw-bold text-danger counter" style="font-size: 1.4rem;" data-target="{{orders_failed}}">{{orders_failed}}</div>
+            <div class="fw-bold text-muted mt-1" style="font-size: 0.7rem;">Failed</div>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-top w-100" style="border-color: color-mix(in srgb, var(--default-color), transparent 90%) !important;">
+          <div class="d-flex justify-content-between align-items-center" style="font-size: 0.75rem;">
+            <span class="text-muted fw-bold">Active Fulfillment</span>
+            <span class="text-warning fw-bold">{{orders_pending}} in queue</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Community -->
+    <div class="col-xl-3 col-lg-6 col-md-12">
+      <div class="admin-card p-3 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="metric-label" style="font-size: 0.75rem;">Store Community</div>
+          <div class="icon-box bg-info-soft" style="width: 38px; height: 38px; font-size: 1.1rem;"><i class="bi bi-people-fill"></i></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-end flex-grow-1 w-100 mb-1">
+          <div class="text-start">
+            <div class="fw-bold text-dark counter" style="font-size: 1.5rem;" data-target="{{total_customers}}">{{total_customers|intcomma}}</div>
+            <div class="fw-bold text-muted mt-1" style="font-size: 0.7rem;">Total Users</div>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold text-warning counter" style="font-size: 1.5rem;" data-target="{{average_store_rating}}">{{average_store_rating|floatformat:1}}</div>
+            <div class="fw-bold text-warning mt-1" style="font-size: 0.7rem;"><i class="bi bi-star-fill"></i> Rating</div>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-top w-100" style="border-color: color-mix(in srgb, var(--default-color), transparent 90%) !important;">
+          <div class="d-flex justify-content-between align-items-center" style="font-size: 0.75rem;">
+            <span class="text-muted fw-bold">Customer Loyalty</span>
+            <span class="text-info fw-bold">High Trust</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-section-title">Store Operations & Growth</div>
+
+  <!-- ROW 2: Deep Analytics & Chart -->
+  <div class="row g-4 mb-4">
+    <!-- Big Chart -->
+    <div class="col-xl-8">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title"><i class="bi bi-graph-up text-accent"></i> Revenue & Order Trajectory</h3>
+        </div>
+        <div class="p-4" style="height: 350px;">
+          <canvas id="nativeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversions & Operations -->
+    <div class="col-xl-4 d-flex flex-column gap-4">
+      
+      <!-- Cart Abandonment -->
+      <div class="admin-card p-4 flex-fill">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="fw-bold text-dark">Cart Abandonment</div>
+          <div class="badge bg-danger-soft px-2 py-1 fs-6">{{cart_abandonment_rate}}%</div>
+        </div>
+        <div class="native-progress mb-3">
+          <div class="native-progress-bar bg-danger" style="width: {{cart_abandonment_rate}}%"></div>
+        </div>
+        <div class="d-flex justify-content-between small fw-bold text-muted">
+          <span>Active Carts: <span class="text-dark">{{active_carts_count}}</span></span>
+          <span>Checked Out: <span class="text-success">{{orders_success}}</span></span>
+        </div>
+      </div>
+
+      <!-- Coupon Usage -->
+      <div class="admin-card p-4 flex-fill">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="fw-bold text-dark">Coupon Utilization</div>
+          <div class="badge bg-warning-soft px-2 py-1 fs-6 text-dark">{{coupon_usage_rate}}%</div>
+        </div>
+        <div class="native-progress mb-3">
+          <div class="native-progress-bar bg-warning" style="width: {{coupon_usage_rate}}%"></div>
+        </div>
+        <div class="d-flex justify-content-between small fw-bold text-muted">
+          <span>Orders w/ Code: <span class="text-dark">{{orders_with_coupon}}</span></span>
+          <span>Live Coupons: <span class="text-accent">{{active_coupons_count}}</span></span>
+        </div>
+      </div>
+
+      <!-- Average Order Value -->
+      <div class="admin-card p-4 flex-fill bg-accent-soft border-0">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold opacity-75 mb-1" style="font-size: 0.8rem; text-transform: uppercase;">Average Order Value</div>
+            <div class="fs-2 fw-bold">${{average_order_value|floatformat:2}}</div>
+          </div>
+          <i class="bi bi-cart-check fs-1 opacity-50"></i>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="dashboard-section-title">Support & Logistics Management</div>
+
+  <!-- ROW 3: Logistics, Support, Inventory -->
+  <div class="row g-4 mb-4">
+    
+    <!-- Actionable Pending Orders -->
+    <div class="col-xl-6">
+      <div class="admin-card" style="border-top: 4px solid #ffc107;">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title"><i class="bi bi-clock-history text-warning"></i> Action Required: Pending Orders</h3>
+          <span class="badge bg-warning text-dark">{{orders_pending}} Awaiting</span>
+        </div>
+        <div class="table-responsive p-2">
+          <table class="table table-borderless align-middle mb-0">
+            <thead class="border-bottom" style="border-color: color-mix(in srgb, var(--default-color), transparent 90%) !important;">
+              <tr>
+                <th class="text-muted small text-uppercase ps-3">Order</th>
+                <th class="text-muted small text-uppercase">Customer</th>
+                <th class="text-muted small text-uppercase">Amount</th>
+                <th class="text-muted small text-uppercase text-end pe-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in actionable_pending_orders %}
+              <tr style="border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 95%);">
+                <td class="fw-bold ps-3">#{{order.id}}</td>
+                <td class="fw-medium">{{order.user.user_profile.get_fullname}}</td>
+                <td class="fw-bold text-success">${{order.total_price|floatformat:2}}</td>
+                <td class="text-end pe-3">
+                  <a href="{% url 'dashboard:admin:order-detail' pk=order.pk %}" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold">Process</a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center py-5 text-muted fw-bold"><i class="bi bi-check-circle text-success fs-3 d-block mb-2"></i> All caught up!</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Communications Queue -->
+    <div class="col-xl-6">
+      <div class="admin-card">
+        <div class="admin-card-header d-flex justify-content-between p-0 border-0" style="background: color-mix(in srgb, var(--default-color), transparent 97%);">
+          <ul class="nav nav-tabs border-0 w-100" id="commsTab">
+            <li class="nav-item w-50">
+              <button class="nav-link active border-0 w-100 py-3 fw-bold bg-transparent text-dark" data-bs-toggle="tab" data-bs-target="#ticketsTab" style="border-bottom: 3px solid var(--accent-color) !important;">
+                Tickets <span class="badge bg-danger-soft ms-1">{{messages_unread}}</span>
+              </button>
+            </li>
+            <li class="nav-item w-50">
+              <button class="nav-link border-0 w-100 py-3 fw-bold bg-transparent text-muted" data-bs-toggle="tab" data-bs-target="#reviewsTab" style="border-bottom: 3px solid transparent !important;">
+                Reviews <span class="badge bg-warning-soft text-dark ms-1">{{reviews_pending}}/{{reviews_total}}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="tab-content" style="height: 300px; overflow-y: auto;">
+          <!-- Tickets -->
+          <div class="tab-pane fade show active" id="ticketsTab">
+            <ul class="admin-list-group">
+              {% for msg in recent_messages %}
+              <li class="admin-list-item flex-column align-items-start">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-bold text-dark text-truncate" style="max-width: 60%;">{{msg.name}}</span>
+                  <span class="text-muted small">{{msg.created_date|timesince}} ago</span>
+                </div>
+                <p class="text-muted small mb-2 fst-italic">{{msg.message|truncatechars:60}}</p>
+                <div class="w-100 text-end">
+                  <a href="{% url 'dashboard:admin:message-detail' pk=msg.pk %}" class="btn btn-sm btn-dark rounded-pill py-1 px-3" style="font-size: 0.75rem;">Read</a>
+                </div>
+              </li>
+              {% empty %}
+              <li class="admin-list-item justify-content-center py-5 text-muted fw-bold"><i class="bi bi-inbox fs-3 text-success d-block mb-2 text-center w-100"></i>Inbox is clear</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <!-- Reviews -->
+          <div class="tab-pane fade" id="reviewsTab">
+            <ul class="admin-list-group">
+              {% for rev in recent_reviews %}
+              <li class="admin-list-item flex-column align-items-start">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-bold text-dark text-truncate" style="max-width: 60%;">{{rev.product.title}}</span>
+                  <span class="text-warning fw-bold small"><i class="bi bi-star-fill"></i> {{rev.rate}}</span>
+                </div>
+                <p class="text-muted small mb-2 fst-italic">"{{rev.description}}"</p>
+                <div class="w-100 text-end">
+                  <a href="{% url 'dashboard:admin:review-edit' pk=rev.pk %}" class="btn btn-sm btn-dark rounded-pill py-1 px-3" style="font-size: 0.75rem;">Moderate</a>
+                </div>
+              </li>
+              {% empty %}
+              <li class="admin-list-item justify-content-center py-5 text-muted fw-bold"><i class="bi bi-check-circle fs-3 text-success d-block mb-2 text-center w-100"></i>No pending reviews</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-section-title">Data & Assets Hub</div>
+
+  <!-- ROW 4: Inventory, Lists, Exports -->
+  <div class="row g-4 mb-5">
+    
+    <!-- Top Products & Wishlisted -->
+    <div class="col-xl-4 col-md-6">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title"><i class="bi bi-trophy-fill text-warning"></i> Store Leaders</h3>
+        </div>
+        <ul class="admin-list-group">
+          {% for item in top_products|slice:":3" %}
+          <li class="admin-list-item px-3">
+            <img src="{{item.product.image.url}}" class="rounded me-3 shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
+            <div class="flex-grow-1 min-width-0">
+              <div class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">{{item.product.title}}</div>
+              <div class="text-success fw-bold small">${{item.product.get_price}} <span class="text-muted fw-normal">({{item.order_count}} sold)</span></div>
+            </div>
+          </li>
+          {% endfor %}
+          <li class="admin-list-item px-3 bg-light text-center justify-content-center fw-bold text-danger text-uppercase" style="font-size: 0.75rem;">
+            Most Wishlisted
+          </li>
+          {% for item in top_wishlisted|slice:":2" %}
+          <li class="admin-list-item px-3">
+            <div class="icon-box bg-danger-soft text-danger me-3" style="width: 40px; height: 40px;"><i class="bi bi-heart-fill"></i></div>
+            <div class="flex-grow-1 min-width-0">
+              <div class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">{{item.product__title}}</div>
+              <div class="text-danger fw-bold small">{{item.wish_count}} Saves</div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Inventory & Recent Customers -->
+    <div class="col-xl-4 col-md-6">
+      <div class="admin-card" style="border-top: 4px solid #dc3545;">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title"><i class="bi bi-boxes text-danger"></i> Inventory Alerts</h3>
+          <span class="badge bg-danger">{{out_of_stock_count}} Out of Stock</span>
+        </div>
+        <div class="p-3 bg-danger-soft mx-3 mt-3 rounded d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-danger">Low Stock Items</span>
+          <span class="badge bg-danger">{{low_stock_products|length}}</span>
+        </div>
+        <ul class="admin-list-group mt-2">
+          {% for p in low_stock_products|slice:":3" %}
+          <li class="admin-list-item px-4 py-2 d-flex justify-content-between align-items-center">
+            <span class="text-dark fw-bold text-truncate" style="font-size: 0.85rem; max-width: 150px;">{{p.title}}</span>
+            <span class="badge bg-warning text-dark rounded-pill">{{p.stock}} left</span>
+          </li>
+          {% empty %}
+          <li class="admin-list-item px-4 text-muted small">Inventory is healthy.</li>
+          {% endfor %}
+        </ul>
+        <hr style="border-color: color-mix(in srgb, var(--default-color), transparent 90%); margin: 1rem 0;">
+        <div class="px-3 pb-3">
+          <h6 class="fw-bold mb-3 ms-2" style="font-size: 0.85rem;"><i class="bi bi-person-plus text-info me-1"></i> Recent Customers</h6>
+          <div class="d-flex flex-wrap gap-2 ms-2">
+            {% for cust in recent_customers|slice:":5" %}
+            <a href="{% url 'dashboard:admin:customer-detail' pk=cust.pk %}" title="{{cust.user_profile.get_fullname}}">
+              <img src="{{cust.user_profile.image.url}}" class="rounded-circle shadow-sm border border-2 border-white" style="width: 38px; height: 38px; object-fit: cover;">
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dedicated Export Hub -->
+    <div class="col-xl-4 col-md-12">
+      <div class="admin-card p-4 bg-accent-soft border-0 d-flex flex-column justify-content-between">
+        <div class="text-center mb-4 mt-2">
+          <i class="bi bi-cloud-arrow-down fs-1 opacity-75"></i>
+          <h3 class="mt-2 fw-bold fs-4">Data Export Hub</h3>
+          <p class="opacity-75 small fw-medium mb-0">Generate and download raw CSV datasets.</p>
+        </div>
+        <div class="d-flex flex-column gap-2">
+          <a href="{% url 'dashboard:admin:export-orders-csv' %}" class="btn btn-light text-start fw-bold w-100 d-flex justify-content-between align-items-center rounded-pill py-2 px-3 shadow-sm">
+            <span class="text-dark"><i class="bi bi-cart-check text-primary me-2"></i> Orders Registry</span>
+            <i class="bi bi-download text-muted"></i>
+          </a>
+          <a href="{% url 'dashboard:admin:export-customers-csv' %}" class="btn btn-light text-start fw-bold w-100 d-flex justify-content-between align-items-center rounded-pill py-2 px-3 shadow-sm">
+            <span class="text-dark"><i class="bi bi-people text-info me-2"></i> Customers DB</span>
+            <i class="bi bi-download text-muted"></i>
+          </a>
+          <a href="{% url 'dashboard:admin:export-products-csv' %}" class="btn btn-light text-start fw-bold w-100 d-flex justify-content-between align-items-center rounded-pill py-2 px-3 shadow-sm">
+            <span class="text-dark"><i class="bi bi-box-seam text-warning me-2"></i> Products Catalog</span>
+            <i class="bi bi-download text-muted"></i>
+          </a>
+          <a href="{% url 'dashboard:admin:export-coupons-csv' %}" class="btn btn-light text-start fw-bold w-100 d-flex justify-content-between align-items-center rounded-pill py-2 px-3 shadow-sm">
+            <span class="text-dark"><i class="bi bi-ticket-perforated text-success me-2"></i> Discount Codes</span>
+            <i class="bi bi-download text-muted"></i>
+          </a>
+          <a href="{% url 'dashboard:admin:export-messages-csv' %}" class="btn btn-light text-start fw-bold w-100 d-flex justify-content-between align-items-center rounded-pill py-2 px-3 shadow-sm">
+            <span class="text-dark"><i class="bi bi-envelope text-danger me-2"></i> Support Logs</span>
+            <i class="bi bi-download text-muted"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-section-title d-flex justify-content-between align-items-center">
+    <span>Live Order Registry</span>
+    <div class="input-group input-group-sm" style="max-width: 200px;">
+      <span class="input-group-text bg-white border-end-0 border-light"><i class="bi bi-search text-muted"></i></span>
+      <input type="text" id="liveSearch" class="form-control border-start-0 border-light fw-bold text-dark" placeholder="Search orders..." style="box-shadow: none;">
+    </div>
+  </div>
+
+  <!-- ROW 5: Recent Orders Table -->
+  <div class="admin-card p-0 mb-5 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-borderless table-hover align-middle mb-0" id="ordersTable">
+        <thead class="border-bottom bg-light text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+          <tr>
+            <th class="ps-4 py-3 text-muted fw-bold">Order ID</th>
+            <th class="py-3 text-muted fw-bold">Customer Name</th>
+            <th class="py-3 text-muted fw-bold">Order Date</th>
+            <th class="py-3 text-muted fw-bold">Amount</th>
+            <th class="py-3 text-muted fw-bold">Status</th>
+            <th class="pe-4 py-3 text-end text-muted fw-bold">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr style="border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 95%);">
+            <td class="ps-4 fw-bold text-dark">#{{order.id}}</td>
+            <td>
+              <div class="d-flex align-items-center">
+                <img src="{{order.user.user_profile.image.url}}" class="rounded-circle me-2 shadow-sm" style="width: 28px; height: 28px; object-fit: cover;">
+                <span class="fw-medium">{{order.user.user_profile.get_fullname}}</span>
+              </div>
+            </td>
+            <td class="text-muted small fw-bold">{{order.created_date|date:"M d, Y"}}</td>
+            <td class="fw-bold text-success">${{order.total_price|floatformat:2|intcomma}}</td>
+            <td>
+              {% if order.status == 2 %}
+              <span class="badge bg-success-soft"><i class="bi bi-check-circle me-1"></i> Success</span>
+              {% elif order.status == 1 %}
+              <span class="badge bg-warning-soft"><i class="bi bi-clock me-1"></i> Pending</span>
+              {% else %}
+              <span class="badge bg-danger-soft"><i class="bi bi-x-circle me-1"></i> Failed</span>
+              {% endif %}
+            </td>
+            <td class="pe-4 text-end">
+              <a href="{% url 'dashboard:admin:order-detail' pk=order.pk %}" class="btn btn-sm btn-light border rounded-pill text-muted fw-bold"><i class="bi bi-eye"></i> View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  
+  // Custom Tab Logic to update bottom borders
+  const tabs = document.querySelectorAll('#commsTab .nav-link');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      tabs.forEach(t => {
+        t.style.borderBottomColor = 'transparent';
+        t.classList.remove('text-dark');
+        t.classList.add('text-muted');
+      });
+      this.style.borderBottomColor = 'var(--accent-color)';
+      this.classList.remove('text-muted');
+      this.classList.add('text-dark');
+    });
+  });
+
+  // Animated Numbers
+  document.querySelectorAll('.counter').forEach(el => {
+    let targetStr = el.getAttribute('data-target').replace(/,/g, '');
+    let target = parseFloat(targetStr);
+    if (isNaN(target)) return;
+    
+    let duration = 1500;
+    let isFloat = target % 1 !== 0 || targetStr.includes('.');
+    let frameRate = 1000 / 60;
+    let totalFrames = duration / frameRate;
+    let currentFrame = 0;
+
+    function easeOutCubic(t) { return (--t) * t * t + 1; }
+
+    let timer = setInterval(() => {
+      currentFrame++;
+      let progress = easeOutCubic(currentFrame / totalFrames);
+      let currentVal = target * progress;
+      
+      if (currentFrame >= totalFrames) {
+        currentVal = target;
+        clearInterval(timer);
+      }
+      
+      let display = isFloat ? currentVal.toFixed(2) : Math.floor(currentVal);
+      el.textContent = Number(display).toLocaleString('en-US', {
+        minimumFractionDigits: isFloat ? 2 : 0, 
+        maximumFractionDigits: isFloat ? 2 : 0
+      });
+    }, frameRate);
+  });
+
+  // Search functionality
+  const searchInput = document.getElementById('liveSearch');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', function() {
+      let filter = this.value.toLowerCase();
+      let rows = document.querySelectorAll('#ordersTable tbody tr');
+      rows.forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+  }
+
+  // Native Chart.js implementation mapping to project variables
+  const canvas = document.getElementById("nativeChart");
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    const style = getComputedStyle(document.body);
+    const accentColor = style.getPropertyValue('--accent-color').trim() || '#0a4db8';
+    
+    const labels = {{ chart_labels|safe }};
+    const revenueData = {{ chart_revenue|safe }};
+    const ordersData = {{ chart_orders|safe }};
+    
+    let grad = ctx.createLinearGradient(0, 0, 0, 350);
+    grad.addColorStop(0, "rgba(25, 135, 84, 0.3)");
+    grad.addColorStop(1, "rgba(25, 135, 84, 0.0)");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [
+          { 
+            label: "Revenue ($)", 
+            data: revenueData, 
+            borderColor: "#198754", 
+            backgroundColor: grad, 
+            fill: true, 
+            tension: 0.4,
+            borderWidth: 3,
+            pointRadius: 0,
+            pointHoverRadius: 6
+          },
+          { 
+            label: "Orders Count", 
+            data: ordersData, 
+            type: "bar",
+            backgroundColor: `color-mix(in srgb, ${accentColor}, transparent 85%)`,
+            hoverBackgroundColor: `color-mix(in srgb, ${accentColor}, transparent 40%)`,
+            borderRadius: 6,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true, 
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: "index" },
+        plugins: { 
+          legend: { position: 'top', align: 'end', labels: { usePointStyle: true } }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, border: {display: false}, grid: { color: "rgba(0,0,0,0.04)" } },
+          y1: { beginAtZero: true, position: 'right', grid: { display: false } }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

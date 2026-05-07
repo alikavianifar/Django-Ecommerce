@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load shop_tags %}
+
+{% block content %}
+
+<!-- Product Details Section -->
+<section id="product-details" class="product-details section">
+  {% include 'messages.html' %}
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+    <div class="row">
+      <!-- Product Images -->
+      <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right" data-aos-delay="200">
+        <div class="product-images">
+          <div class="main-image-container mb-3">
+            <div class="image-zoom-container">
+              <img src="{{object.image.url}}" alt="Product Image" class="img-fluid main-image drift-zoom"
+                id="main-product-image" data-zoom="{{object.image.url}}">
+            </div>
+          </div>
+
+          <div class="product-thumbnails">
+            <div class="swiper product-thumbnails-slider init-swiper">
+              <script type="application/json" class="swiper-config">
+                    {
+                      "loop": false,
+                      "speed": 400,
+                      "slidesPerView": 4,
+                      "spaceBetween": 10,
+                      "navigation": {
+                        "nextEl": ".swiper-button-next",
+                        "prevEl": ".swiper-button-prev"
+                      },
+                      "breakpoints": {
+                        "320": {
+                          "slidesPerView": 3
+                        },
+                        "576": {
+                          "slidesPerView": 4
+                        }
+                      }
+                    }
+                  </script>
+              <div class="swiper-wrapper">
+                <div class="swiper-slide thumbnail-item active" data-image="{{object.image.url}}">
+                  <img src="{{object.image.url}}" alt="Product Thumbnail" class="img-fluid">
+                </div>
+
+                {% for img in object.images.all %}
+                <div class="swiper-slide thumbnail-item" data-image="{{ img.file.url }}">
+                  <img src="{{ img.file.url }}" alt="Product Thumbnail" class="img-fluid">
+                </div>
+                {% endfor %}
+              </div>
+              <div class="swiper-button-next"></div>
+              <div class="swiper-button-prev"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+        <div class="product-info">
+          <div class="product-meta mb-2">
+            <div>
+              {% for category in object.category.all %}
+              <span class="product-category">{{category.title}}
+                {% if not forloop.last %},{% endif %}
+              </span>
+              {% endfor %}
+            </div>
+
+
+            <div class="product-rating">
+              {% for i in "12345" %}
+                {% if forloop.counter <= object.full_stars %}
+                    <i class="bi bi-star-fill text-warning"></i>
+                {% elif forloop.counter == object.full_stars|add:1 and object.has_half_star %}
+                    <i class="bi bi-star-half text-warning"></i>
+                {% else %}
+                    <i class="bi bi-star text-warning"></i>
+                {% endif %}
+              {% endfor %}
+              <span class="rating-count">({{object.avg_rate}})</span>
+            </div>
+          </div>
+
+          <h1 class="product-title"><span style="color: #ff5050;">{{object.brand}}</span> {{object.title}}</h1>
+
+          <div class="product-price-container mb-4">
+            {% if object.is_discounted %}
+            <span class="current-price">${{ object.get_price|intcomma }}</span>
+            <span class="original-price">${{ object.price|intcomma }}</span>
+            <span class="discount-badge">{{object.discount}}%</span>
+            {% else %}
+            <span class="current-price">${{ object.price|intcomma }}</span>
+            {% endif %}
+          </div>
+
+          <div class="product-short-description mb-4">
+            <p>{{ object.description}}</p>
+          </div>
+
+          <div class="product-availability mb-4">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <span>In Stock</span>
+            {% if object.stock < 10 %} <span class="stock-count">({{ object.stock }} items left)</span>
+              {% endif %}
+          </div>
+
+          <!-- Color Options -->
+          <div class="product-colors mb-4">
+            <h6 class="option-title">Color:</h6>
+            <div class="color-options">
+              <div class="color-option active" data-color="Black" style="background-color: #222;">
+                <i class="bi bi-check"></i>
+              </div>
+              <div class="color-option" data-color="Silver" style="background-color: #C0C0C0;">
+                <i class="bi bi-check"></i>
+              </div>
+              <div class="color-option" data-color="Blue" style="background-color: #1E3A8A;">
+                <i class="bi bi-check"></i>
+              </div>
+              <div class="color-option" data-color="Rose Gold" style="background-color: #B76E79;">
+                <i class="bi bi-check"></i>
+              </div>
+            </div>
+            <span class="selected-option">Black</span>
+          </div>
+
+          <!-- Size Options if applicable -->
+          <div class="product-sizes mb-4">
+            <h6 class="option-title">Size:</h6>
+            <div class="size-options">
+              <div class="size-option" data-size="S">S</div>
+              <div class="size-option active" data-size="M">M</div>
+              <div class="size-option" data-size="L">L</div>
+            </div>
+            <span class="selected-option">M</span>
+          </div>
+
+          <!-- Quantity Selector -->
+          <!-- <div class="product-quantity mb-4">
+            <h6 class="option-title">Quantity:</h6>
+            <div class="quantity-selector">
+              <button class="quantity-btn decrease">
+                <i class="bi bi-dash"></i>
+              </button>
+              <input type="number" class="quantity-input" value="1" min="1" max="24">
+              <button class="quantity-btn increase">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div> -->
+
+          <!-- Action Buttons -->
+          <div class="product-actions">
+            <button type="button" class="btn btn-primary add-to-cart-btn" onclick="addToCart('{{object.id}}')">
+              <i class="bi bi-cart-plus"></i> Add to Cart
+            </button>
+
+            {% if request.user.is_authenticated %}
+              <button type="button" onclick="addToWishlist(this, '{{object.id}}')" 
+              class="whishlist-btn mt-1 {% if object.id in is_wished %} active {% endif %}">
+              <i class="bi bi-heart"></i>
+              </button>
+            {% endif %}
+          </div>
+
+          <!-- Additional Info -->
+          <div class="additional-info mt-4">
+            <div class="info-item">
+              <i class="bi bi-truck"></i>
+              <span>Free shipping on orders over $50</span>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-arrow-repeat"></i>
+              <span>30-day return policy</span>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-shield-check"></i>
+              <span>2-year warranty</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Details Tabs -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="product-details-tabs">
+          <ul class="nav nav-tabs" id="productTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description"
+                type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications"
+                type="button" role="tab" aria-controls="specifications" aria-selected="false">Specifications</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button"
+                role="tab" aria-controls="reviews" aria-selected="false">Reviews ({{reviews.count}})</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="productTabsContent">
+            <!-- Description Tab -->
+            <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+              <div class="product-description">
+                <h4>Product Overview</h4>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum at lacus congue, suscipit elit
+                  nec, tincidunt orci. Phasellus egestas nisi vitae lectus imperdiet venenatis. Suspendisse vulputate
+                  quam diam, et consectetur augue condimentum in. Aenean dapibus urna eget nisi pharetra, in iaculis
+                  nulla blandit. Praesent at consectetur sem, sed sollicitudin nibh. Ut interdum risus ac nulla placerat
+                  aliquet.</p>
+
+                <h4>Key Features</h4>
+                <ul>
+                  <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+                  <li>Vestibulum at lacus congue, suscipit elit nec, tincidunt orci</li>
+                  <li>Phasellus egestas nisi vitae lectus imperdiet venenatis</li>
+                  <li>Suspendisse vulputate quam diam, et consectetur augue condimentum in</li>
+                  <li>Aenean dapibus urna eget nisi pharetra, in iaculis nulla blandit</li>
+                </ul>
+
+                <h4>What's in the Box</h4>
+                <ul>
+                  <li>Lorem Ipsum Wireless Headphones</li>
+                  <li>Carrying Case</li>
+                  <li>USB-C Charging Cable</li>
+                  <li>3.5mm Audio Cable</li>
+                  <li>User Manual</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Specifications Tab -->
+            <div class="tab-pane fade" id="specifications" role="tabpanel" aria-labelledby="specifications-tab">
+              <div class="product-specifications">
+                <div class="specs-group">
+                  <h4>Technical Specifications</h4>
+                  <div class="specs-table">
+                    <div class="specs-row">
+                      <div class="specs-label">Connectivity</div>
+                      <div class="specs-value">Bluetooth 5.0, 3.5mm jack</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Battery Life</div>
+                      <div class="specs-value">Up to 30 hours</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Charging Time</div>
+                      <div class="specs-value">3 hours</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Driver Size</div>
+                      <div class="specs-value">40mm</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Frequency Response</div>
+                      <div class="specs-value">20Hz - 20kHz</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Impedance</div>
+                      <div class="specs-value">32 Ohm</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Weight</div>
+                      <div class="specs-value">250g</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="specs-group">
+                  <h4>Features</h4>
+                  <div class="specs-table">
+                    <div class="specs-row">
+                      <div class="specs-label">Noise Cancellation</div>
+                      <div class="specs-value">Active Noise Cancellation (ANC)</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Controls</div>
+                      <div class="specs-value">Touch controls, Voice assistant</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Microphone</div>
+                      <div class="specs-value">Dual beamforming microphones</div>
+                    </div>
+                    <div class="specs-row">
+                      <div class="specs-label">Water Resistance</div>
+                      <div class="specs-value">IPX4 (splash resistant)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+              <div class="product-reviews">
+                <div class="reviews-summary">
+                  <div class="overall-rating">
+                    <div class="rating-number">{{object.avg_rate}}</div>
+
+                    <div class="d-flex gap-1 small">
+                      <div class="rating-stars">
+                      {% for i in "12345" %}
+                        {% if forloop.counter <= object.full_stars %}
+                            <i class="bi bi-star-fill text-warning"></i>
+                        {% elif forloop.counter == object.full_stars|add:1 and object.has_half_star %}
+                            <i class="bi bi-star-half text-warning"></i>
+                        {% else %}
+                            <i class="bi bi-star text-warning"></i>
+                        {% endif %}
+                      {% endfor %}
+                      </div>
+                    </div>
+
+                    <div class="rating-count">Based on {{reviews.count}} reviews</div>
+                  </div>
+
+                  <div class="rating-breakdown">
+                    <div class="rating-bar">
+                      <div class="rating-label">5 stars</div>
+                      <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{reviews_avg.rate_5}}%;" aria-valuenow="100"
+                          aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                      </div>
+                      <div class="rating-count">{{reviews_count.rate_5}}</div>
+                    </div>
+                    <div class="rating-bar">
+                      <div class="rating-label">4 stars</div>
+                      <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{reviews_avg.rate_4}}%;" aria-valuenow="100"
+                          aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                      </div>
+                      <div class="rating-count">{{reviews_count.rate_4}}</div>
+                    </div>
+                    <div class="rating-bar">
+                      <div class="rating-label">3 stars</div>
+                      <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{reviews_avg.rate_3}}%;" aria-valuenow="100"
+                          aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                      </div>
+                      <div class="rating-count">{{reviews_count.rate_3}}</div>
+                    </div>
+                    <div class="rating-bar">
+                      <div class="rating-label">2 stars</div>
+                      <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{reviews_avg.rate_2}}%;" aria-valuenow="100"
+                          aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                      </div>
+                      <div class="rating-count">{{reviews_count.rate_2}}</div>
+                    </div>
+                    <div class="rating-bar">
+                      <div class="rating-label">1 star</div>
+                      <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{reviews_avg.rate_1}}%;" aria-valuenow="100"
+                          aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                      </div>
+                      <div class="rating-count">{{reviews_count.rate_1}}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="reviews-list mt-5">
+                  <h4>Customer Reviews</h4>
+
+                  <!-- Review Item -->
+                   {% for review in reviews %}
+                  <div class="review-item">
+                    <div class="review-header">
+                      <div class="reviewer-info">
+                        <img src="{{review.user.user_profile.image.url}}" alt="Reviewer" class="reviewer-avatar">
+                        <div>
+                          <h5 class="reviewer-name">{{review.user.user_profile.get_fullname}}</h5>
+                          <div class="review-date">{{review.created_date|date:"M d,Y"}}</div>
+                        </div>
+                      </div>
+                      <div class="review-rating">
+                        
+                      {% for i in "12345" %}
+                        {% if i|add:0 <= review.rate %} 
+                        <span><i class="bi bi-star-fill"></i></span>
+                        {% else %}
+                        <span><i class="bi bi-star"></i></span>
+                        {% endif %}
+                      {% endfor %}
+                      
+                      </div>
+                    </div>
+                    <!-- <h5 class="review-title">Exceptional sound quality and comfort</h5> -->
+                    <div class="review-content">
+                      <p>{{review.description}}</p>
+                    </div>
+                  </div>
+                  {% endfor %}
+                  <!-- End Review Item -->
+
+                  <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary load-more-btn mb-4">Load More Reviews</button>
+                  </div>
+                </div>
+
+                <div class="review-form-container">
+                  
+                  <h4>Write a Review</h4>
+                  {% if request.user.is_authenticated %}
+                  <form action="{% url 'review:submit-review' %}" method="post">
+                    {% csrf_token %}
+                    <input hidden name="product" value="{{object.id}}">
+                    <div class="rating-select mb-4">
+                      <label class="form-label">Your Rating</label>
+                      
+                      <div class="star-rating">
+                        <input type="radio" id="star5" name="rate" value="5"><label for="star5" title="5 stars"><i
+                            class="bi bi-star-fill"></i></label>
+                        <input type="radio" id="star4" name="rate" value="4"><label for="star4" title="4 stars"><i
+                            class="bi bi-star-fill"></i></label>
+                        <input type="radio" id="star3" name="rate" value="3"><label for="star3" title="3 stars"><i
+                            class="bi bi-star-fill"></i></label>
+                        <input type="radio" id="star2" name="rate" value="2"><label for="star2" title="2 stars"><i
+                            class="bi bi-star-fill"></i></label>
+                        <input type="radio" id="star1" name="rate" value="1"><label for="star1" title="1 star"><i
+                            class="bi bi-star-fill"></i></label>
+                      </div>
+                    </div>
+
+                    <div class="mb-4">
+                      <label for="review-content" class="form-label">Your Review</label>
+                      <textarea name="description" class="form-control" id="review-content" rows="4" required=""></textarea>
+                      <div class="form-text">Tell others what you think about this product. Be honest and helpful!</div>
+                    </div>
+
+                    <div class="d-grid">
+                      <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+                  </form>
+                  {% else %}
+                  Share your thoughts with other customers. <a class="text-warning" href="{% url 'accounts:login' %}?next={{ request.path }}">Login</a>
+                  {% endif %}
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section><!-- /Product Details Section -->
+
+{% show_similar_products product=object %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function addToWishlist(elemet,product_id) {
+
+    //console.log(product_id)
+    $.ajax({
+        url: "{% url 'shop:add-or-remove-whishlist' %}",
+        method: 'POST',
+        data: {
+            product_id: product_id,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+
+        },
+        success: function (response) {
+            // do something with the response data
+            $(elemet).toggleClass('active')
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+            // handle the error case
+        }
+    });
+}
+</script>
+
+{% endblock extra_js %}

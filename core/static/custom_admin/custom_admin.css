@@ -1,0 +1,15 @@
+.custom-delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.custom-delete-btn:hover {
+    background-color: #b02a37;
+}
+
+/* input[name$="DELETE"] + label {
+    display: none !important;
+} */

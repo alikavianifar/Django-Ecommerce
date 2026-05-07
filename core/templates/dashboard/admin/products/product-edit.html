@@ -1,0 +1,412 @@
+{% extends "dashboard/admin/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="section-header" data-aos="fade-up">
+  <h2>
+    {% if object %}
+    Edit Product
+    {% else %}
+    Add New Product
+    {% endif %}
+  </h2>
+
+  <!-- Page header -->
+  <div class="row mb-4">
+    <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+      <div class="d-flex flex-wrap gap-2">
+
+        {% if object %}
+        <a href="{% url 'dashboard:admin:product-create' %}" class="btn btn-add-new pt-2"><i class="bi bi-plus-lg"></i> New Product</a>
+        <a href="{% url 'shop:product-details' slug=object.slug %}" class="btn btn-add-new pt-2" target="_blank">
+          <i class="bi bi-box-arrow-up-right me-1"></i> View product
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<form id="product-form" action="." method="POST" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
+  <!-- Product Image -->
+  <div class="card mb-4">
+    <div class="card-header bg-white border-0">
+      <h5 class="mb-0">Product Image</h5>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label for="{{ form.image.id_for_label }}" class="form-label">Image</label>
+
+        <div class="p-4 text-center rounded-3" style="border: 2px dashed #0a4db8;">
+
+          <div class="border rounded overflow-hidden mx-auto mb-3" style="width: 96px; height: 96px;">
+            {% if object and object.image %}
+            <img id="image-preview" src="{{ object.image.url }}" alt="{{ object.title }}" class="img-fluid h-100 w-100"
+              style="object-fit: cover;" data-original-src="{{ object.image.url }}">
+            {% else %}
+            <img id="image-preview" src="" alt="" class="img-fluid h-100 w-100"
+              style="object-fit: cover; display: none;">
+            {% endif %}
+          </div>
+
+          {{ form.image }}
+
+          <label for="{{ form.image.id_for_label }}" class="btn btn-add-new pt-2" style="cursor:pointer;">
+            Click to upload image
+          </label>
+
+          {% if form.image.errors %}
+          <div class="text-danger small mt-2">
+            {{ form.image.errors|striptags }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Product Details -->
+  <div class="card mb-4">
+    <div class="card-header bg-white border-0">
+      <h5 class="mb-0">Product Details</h5>
+    </div>
+    <div class="card-body">
+      <!-- Brand -->
+      <div class="mb-3">
+        <label for="{{ form.brand.id_for_label }}" class="form-label">Brand</label>
+        {{ form.brand }}
+        {% if form.brand.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.brand.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Title -->
+      <div class="mb-3">
+        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.title.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Slug -->
+      <div class="mb-3">
+        <label for="{{ form.slug.id_for_label }}" class="form-label">Slug (URL)</label>
+
+        <div class="input-group">
+          {{ form.slug }}
+
+          <button class="btn btn-add-new" type="button" id="generate-slug-btn">
+            Generate slug
+          </button>
+        </div>
+
+        {% if form.slug.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.slug.errors|striptags }}
+        </div>
+        {% endif %}
+
+        <div class="form-text">
+          The slug is used in the product URL. Use only lowercase letters, numbers and hyphens.
+        </div>
+      </div>
+
+
+      <!-- Description with toolbar mockup -->
+      <div class="mb-3">
+        <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+
+        <!-- Simple toolbar (you can hook this textarea to any WYSIWYG editor) -->
+        <div class="border rounded-top p-2 bg-light">
+          <div class="btn-toolbar" role="toolbar">
+            <div class="btn-group me-2" role="group">
+              <button type="button" class="btn btn-sm btn-outline-secondary">B</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary"><em>I</em></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">U</button>
+            </div>
+            <div class="btn-group me-2" role="group">
+              <button type="button" class="btn btn-sm btn-outline-secondary">• List</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">1. List</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-sm btn-outline-secondary">Link</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">Image</button>
+            </div>
+          </div>
+        </div>
+
+        {{ form.description }}
+
+        {% if form.description.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.description.errors|striptags }}
+        </div>
+        {% endif %}
+
+        <small class="text-muted">
+          You can integrate a rich-text editor (TinyMCE, CKEditor, etc.) with this textarea.
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory & Pricing -->
+  <div class="card mb-4">
+    <div class="card-header bg-white border-0">
+      <h5 class="mb-0">Inventory &amp; Pricing</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Stock -->
+        <div class="col-md-4">
+          <label for="{{ form.stock.id_for_label }}" class="form-label">Stock</label>
+          {{ form.stock }}
+          {% if form.stock.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.stock.errors|striptags }}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Price -->
+        <div class="col-md-4">
+          <label for="{{ form.price.id_for_label }}" class="form-label">Price</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            {{ form.price }}
+          </div>
+          {% if form.price.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.price.errors|striptags }}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Discount -->
+        <div class="col-md-4">
+          <label for="{{ form.discount.id_for_label }}" class="form-label">Discount (%)</label>
+          {{ form.discount }}
+          {% if form.discount.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.discount.errors|striptags }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category & Status -->
+  <div class="card mb-4">
+    <div class="card-header bg-white border-0">
+      <h5 class="mb-0">Category &amp; Status</h5>
+    </div>
+    <div class="card-body">
+      <!-- Category (multiple) -->
+      <div class="mb-3">
+        <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+        {{ form.category }}
+        {% if form.category.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.category.errors|striptags }}
+        </div>
+        {% endif %}
+        <small class="text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple categories.</small>
+      </div>
+
+      <!-- Status -->
+      <div class="mb-3">
+        <label class="form-label d-block">Status</label>
+
+        {% for value, label in form.status.field.choices %}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="{{ form.status.name }}"
+            id="id_{{ form.status.name }}_{{ forloop.counter0 }}" value="{{ value }}" {% if form.status.value == value%}checked{% endif %}>
+          <label class="form-check-label" for="id_{{ form.status.name }}_{{ forloop.counter0 }}">
+            {{ label }}
+          </label>
+        </div>
+        {% endfor %}
+
+        {% if form.status.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.status.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Form actions (optional) -->
+<div class="d-flex justify-content-between align-items-center">
+
+  {% if object %}
+    <button
+      style="background-color: #df1529;"
+      type="button"
+      class="btn btn-add-new"
+      data-bs-toggle="modal"
+      data-bs-target="#deleteProductModal">
+      <i class="bi bi-trash me-1"></i> Delete
+    </button>
+  {% endif %}
+
+  <button type="submit" class="btn btn-add-new">
+    <i class="bi bi-save me-1"></i>
+    {% if object %}Update Product{% else %}Create Product{% endif %}
+  </button>
+
+</div>
+
+</form>
+
+<!-- Delete Product Modal -->
+{% if object %}
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteProductModalLabel">Delete product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        Are you sure you want to delete <strong>{{ object.title }}</strong>?
+        <div class="text-muted small mt-2">
+          This action cannot be undone.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-add-new" data-bs-dismiss="modal">
+          Cancel
+        </button>
+
+        <form method="post" action="{% url 'dashboard:admin:product-delete' pk=object.pk %}">
+          {% csrf_token %}
+          <button style="background-color: #df1529;" type="submit" class="btn btn-add-new">
+            Yes, delete
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<!-- TinyMCE (rich text editor for description) -->
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (document.getElementById("{{ form.description.id_for_label }}") || document.getElementById("id_description")) {
+      tinymce.init({
+        selector: '#id_description',
+        menubar: false,
+        statusbar: true,
+        height: 320,
+        plugins: 'advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table code help wordcount',
+        toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table | removeformat | fullscreen | code',
+        branding: false
+      });
+    }
+  });
+</script>
+
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // TinyMCE
+    if (document.getElementById("{{ form.description.id_for_label }}") || document.getElementById("id_description")) {
+      tinymce.init({
+        selector: '#id_description',
+        menubar: false,
+        statusbar: true,
+        height: 320,
+        plugins: 'advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table code help wordcount',
+        toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table | removeformat | fullscreen | code',
+        branding: false
+      });
+    }
+
+    // ==== Image preview ====
+    const fileInput = document.getElementById("{{ form.image.id_for_label }}") || document.getElementById("image");
+    const previewImg = document.getElementById("image-preview");
+
+    if (fileInput && previewImg) {
+      fileInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) {
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImg.src = e.target.result;
+          previewImg.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  });
+</script>
+
+
+<script>
+  function slugify(str) {
+
+    str = str.trim().toLowerCase();
+
+    return str
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const titleInput = document.getElementById("title");
+    const slugInput = document.getElementById("slug");
+    const genBtn = document.getElementById("generate-slug-btn");
+
+    if (!titleInput || !slugInput || !genBtn) {
+      return;
+    }
+
+    genBtn.addEventListener("click", function () {
+      const titleValue = titleInput.value || "";
+
+      if (!titleValue.trim()) {
+        return;
+      }
+
+      const generatedSlug = slugify(titleValue);
+
+      slugInput.value = generatedSlug;
+    });
+  });
+</script>
+
+{% endblock %}

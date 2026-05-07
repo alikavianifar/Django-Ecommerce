@@ -1,0 +1,64 @@
+{% extends 'dashboard/admin/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="section-header" data-aos="fade-up">
+  <h2>Create Coupon</h2>
+  <div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center mt-3">
+      <a href="{% url 'dashboard:admin:coupon-list' %}" class="btn btn-add-new pt-2">
+        <i class="bi bi-arrow-left"></i> Back to coupons
+      </a>
+    </div>
+  </div>
+</div>
+
+<form action="." method="POST" novalidate>
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0">
+      <h5 class="mb-0"><i class="bi bi-ticket-perforated"></i> Coupon Details</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="{{ form.code.id_for_label }}" class="form-label fw-bold">Coupon Code</label>
+          {{ form.code }}
+          <small class="text-muted d-block mt-1">Unique code customers will enter at checkout.</small>
+          {% if form.code.errors %}<div class="text-danger small mt-1">{{ form.code.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="{{ form.discount_percent.id_for_label }}" class="form-label fw-bold">Discount Percentage</label>
+          {{ form.discount_percent }}
+          <small class="text-muted d-block mt-1">0–100%</small>
+          {% if form.discount_percent.errors %}<div class="text-danger small mt-1">{{ form.discount_percent.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="{{ form.max_limit_usage.id_for_label }}" class="form-label fw-bold">Max Usage Limit</label>
+          {{ form.max_limit_usage }}
+          <small class="text-muted d-block mt-1">Maximum number of times this coupon can be used.</small>
+          {% if form.max_limit_usage.errors %}<div class="text-danger small mt-1">{{ form.max_limit_usage.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="{{ form.expiration_date.id_for_label }}" class="form-label fw-bold">Expiration Date</label>
+          {{ form.expiration_date }}
+          <small class="text-muted d-block mt-1">Leave empty for no expiration.</small>
+          {% if form.expiration_date.errors %}<div class="text-danger small mt-1">{{ form.expiration_date.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end mb-5 gap-2">
+    <a href="{% url 'dashboard:admin:coupon-list' %}" class="btn btn-danger">Cancel</a>
+    <button type="submit" class="btn btn-add-new">
+      <i class="bi bi-plus-circle"></i> Create Coupon
+    </button>
+  </div>
+</form>
+{% endblock %}

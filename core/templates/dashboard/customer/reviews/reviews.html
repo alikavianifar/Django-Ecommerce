@@ -1,0 +1,45 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Reviews Tab -->
+  <div class="section-header" data-aos="fade-up">
+    <h2>My Reviews ({{total_items}})</h2>
+  </div>
+
+  <div class="reviews-grid">
+    <!-- Review Card 1 -->
+     {% for object in object_list %}
+    <div class="review-card" data-aos="fade-up" data-aos-delay="100">
+      <div class="review-header">
+        <img src="{{object.product.image.url}}" alt="Product" class="product-image" loading="lazy">
+        <div class="review-meta">
+          <div class="rating">
+            {% for i in "12345" %}
+              {% if i|add:0 <= object.rate %} 
+              <span><i class="bi bi-star-fill"></i></span>
+              {% else %}
+              <span><i class="bi bi-star"></i></span>
+              {% endif %}
+            {% endfor %}
+            <span>({{object.rate}})</span>
+          </div>
+          <div class="review-date">{{object.created_date}}</div>
+        </div>
+      </div>
+      <div class="review-content">
+        <p>{{object.description}}</p>
+      </div>
+      <div class="review-footer">
+        {% if object.status == 2 %}
+        <span class="status delivered text-success">Accepted</span>
+        {% elif object.status == 1 %}
+        <span class="status processing text-warning">Pending</span>
+        {% else %}
+        <span class="status cancelled text-danger">Rejected</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endblock %}

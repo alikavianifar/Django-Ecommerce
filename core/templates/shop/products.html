@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+
+    <div class="col-lg-3 sidebar">
+      {% include "shop/sidebar.html" %}
+    </div>
+
+    <div class="col-lg-9">
+
+      <!-- Category Header Section -->
+      <section id="category-header" class="category-header section">
+
+        <div class="container" data-aos="fade-up">
+
+          <!-- Filter and Sort Options -->
+          <div class="filter-container mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="row g-3">
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="filter-item search-form">
+                  <form method="get">
+                    {% for key, value in request.GET.items %}
+                      {% if key != "q" %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                      {% endif %}
+                    {% endfor %}
+                    <label for="productSearch" class="form-label">Search Products</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="productSearch" name="q"
+                            value="{{ request.GET.q|default_if_none:'' }}"
+                            placeholder="Search for products..." aria-label="Search for products">
+                      <button class="btn search-btn" type="submit">
+                        <i class="bi bi-search"></i>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+
+              <div class="col-12 col-md-6 col-lg-2">
+                <div class="filter-item">
+                  <form method="get">
+                    {% for key, value in request.GET.items %}
+                      {% if key != "price_range" %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                      {% endif %}
+                    {% endfor %}
+                    <label for="priceRange" class="form-label">Price Range</label>
+                    <select class="form-select" id="priceRange" name="price_range" onchange="this.form.submit()">
+                      <option value="" {% if not request.GET.price_range %}selected{% endif %}>All Prices</option>
+                      <option value="0-25" {% if request.GET.price_range == "0-25" %}selected{% endif %}>Under $25</option>
+                      <option value="25-50" {% if request.GET.price_range == "25-50" %}selected{% endif %}>$25 to $50</option>
+                      <option value="50-100" {% if request.GET.price_range == "50-100" %}selected{% endif %}>$50 to $100</option>
+                      <option value="100-200" {% if request.GET.price_range == "100-200" %}selected{% endif %}>$100 to $200</option>
+                      <option value="200-15000" {% if request.GET.price_range == "200-15000" %}selected{% endif %}>$200 &amp; Above</option>
+                    </select>
+                  </form>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-2">
+                <form method="get">
+                  {% for key, value in request.GET.items %}
+                    {% if key != "order_by" %}
+                      <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                  {% endfor %}
+                  <div class="filter-item">
+                    <label for="sortBy" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortBy" name="order_by" onchange="this.form.submit()">
+                      <option value="" {% if not request.GET.order_by %}selected{% endif %}>Newest</option>
+                      <option value="-price" {% if request.GET.order_by == "-price" %}selected{% endif %}>Price: High to Low</option>
+                      <option value="price" {% if request.GET.order_by == "price" %}selected{% endif %}>Price: Low to High</option>
+                    </select>
+                  </div>
+                </form>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="filter-item">
+                  <label class="form-label">View</label>
+                  <div class="d-flex align-items-center">
+                    <form method="get" id="view-form">
+                      <input type="hidden" name="view" id="view-input" value="{{ view_mode }}">
+                      {% for key, value in request.GET.items %}
+                        {% if key != 'view' and key != 'page' %}
+                          <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                      {% endfor %}
+                      <div class="view-options me-3">
+                        <button type="button" class="btn view-btn {% if view_mode == 'grid' %}active{% endif %}" data-view="grid" aria-label="Grid view">
+                          <i class="bi bi-grid-3x3-gap-fill"></i>
+                        </button>
+                        <button type="button" class="btn view-btn {% if view_mode == 'list' %}active{% endif %}" data-view="list" aria-label="List view">
+                          <i class="bi bi-list-ul"></i>
+                        </button>
+                      </div>
+                    </form>
+
+                    <div class="items-per-page">
+                      <form method="get" id="page-size-form">
+                        {% for key, value in request.GET.items %}
+                          {% if key != "page_size" %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                          {% endif %}
+                        {% endfor %}
+                        <select name="page_size" class="form-select" id="itemsPerPage" onchange="this.form.submit()">
+                          <option value="6" {% if request.GET.page_size == '6' %}selected{% endif %}>6 per page</option>
+                          <option value="12" {% if request.GET.page_size == '12' %}selected{% endif %}>12 per page</option>
+                          <option value="18" {% if request.GET.page_size == '18' %}selected{% endif %}>18 per page</option>
+                          <option value="24" {% if request.GET.page_size == '24' %}selected{% endif %}>24 per page</option>
+                        </select>
+                      </form>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-12" data-aos="fade-up" data-aos-delay="200">
+                {% if has_filters %}
+                <div class="active-filters">
+                  <span class="active-filter-label">Active Filters:</span>
+                  <div class="filter-tags">
+                    {% for filter in active_filters %}
+                      <span class="filter-tag">
+                        {{ filter.label }}
+                        <a href="?{% for key, value in request.GET.items %}{% if key != filter.param %}{{ key }}={{ value }}&{% endif %}{% endfor %}"
+                          class="filter-remove">
+                          <i class="bi bi-x"></i>
+                        </a>
+                      </span>
+                    {% endfor %}
+
+                    <a href="{% url 'shop:products' %}" class="clear-all-btn">Clear All</a>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section><!-- /Category Header Section -->
+
+      <!-- Category Product List Section -->
+      <section id="category-product-list" class="category-product-list section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+          <div id="products-container" class="row gy-4 {{ view_mode }}-view">
+            {% for object in object_list %}
+              {% if view_mode == "list" %}
+                {% include "shop/products-list-view.html" %}
+              {% else %}
+                <div class="col-lg-4 product-item">
+                  <div class="product-box">
+                    <div class="product-thumb">
+                      {% if object.is_discounted %}
+                      <span class="product-label">Sale</span>
+                      {% endif %}
+                      <img src="{{object.image.url}}" alt="Product Image" class="main-img" loading="lazy">
+                      <div class="product-overlay">
+                        <div class="product-quick-actions">
+                          {% if request.user.is_authenticated %}
+                          <button type="button" onclick="addToWishlist(this, '{{object.id}}')" 
+                          class="quick-action-btn {% if object.id in wishlist_items %} active {% endif %}">
+                          <i class="bi bi-heart"></i>
+                          </button>
+                          <button type="button" class="quick-action-btn">
+                            <i class="bi bi-arrow-repeat"></i>
+                          </button>
+                          <button type="button" class="quick-action-btn">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                          {% endif %}
+                        </div>
+                        <div class="add-to-cart-container">
+                          <button type="button" class="add-to-cart-btn" onclick="addToCart('{{object.id}}')">Add to Cart</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="product-content">
+                      <div class="product-details">
+                        <h5 class="product-title"><a href="{% url 'shop:product-details' slug=object.slug %}">{{object.title}}</a></h5>
+
+                        <div class="product-price">
+                          {% if object.is_discounted %}
+                          <span class="sale">${{ object.get_price|intcomma }}</span>
+                          <span class="original">${{ object.price|intcomma }}</span>
+                          {% else %}
+                          <span class="original-price-category">${{ object.price|intcomma }}</span>
+                          {% endif %}
+                        </div>
+
+                      </div>
+                      <div class="product-rating">
+                        {% for i in "12345" %}
+                          {% if forloop.counter <= object.full_stars %}
+                              <i class="bi bi-star-fill text-warning"></i>
+                          {% elif forloop.counter == object.full_stars|add:1 and object.has_half_star %}
+                              <i class="bi bi-star-half text-warning"></i>
+                          {% else %}
+                              <i class="bi bi-star text-warning"></i>
+                          {% endif %}
+                        {% endfor %}
+                        <span class="rating-count">({{object.avg_rate}})</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+        </div>
+
+
+      </section><!-- /Category Product List Section -->
+
+      {% if page_obj.has_other_pages %}
+      <!-- Pagination Section -->
+      <section id="category-pagination" class="category-pagination section">
+        <div class="container">
+          <nav class="d-flex justify-content-center" aria-label="Page navigation">
+            <ul>
+
+              {# Previous Page #}
+              {% if page_obj.has_previous %}
+                <li>
+                  <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                    <i class="bi bi-arrow-left"></i>
+                    <span class="d-none d-sm-inline">Previous</span>
+                  </a>
+                </li>
+              {% endif %}
+
+              {# Show first page and ellipsis if needed #}
+              {% if page_obj.number > 3 %}
+                <li><a href="?page=1">1</a></li>
+                {% if page_obj.number > 4 %}
+                  <li class="ellipsis">...</li>
+                {% endif %}
+              {% endif %}
+
+              {# Pages around current page #}
+              {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                  {% if num == page_obj.number %}
+                    <li><a href="?page={{ num }}&view={{ view_mode }}" class="active">{{ num }}</a></li>
+                  {% else %}
+                    <li><a href="?page={{ num }}&view={{ view_mode }}">{{ num }}</a></li>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              {# Show ellipsis and last page if needed #}
+              {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                  <li class="ellipsis">...</li>
+                {% endif %}
+                <li><a href="?page={{ page_obj.paginator.num_pages }}&view={{ view_mode }}">{{ page_obj.paginator.num_pages }}</a></li>
+              {% endif %}
+
+              {# Next Page #}
+              {% if page_obj.has_next %}
+                <li>
+                  <a href="?page={{ page_obj.next_page_number }}&view={{ view_mode }}" aria-label="Next page">
+                    <span class="d-none d-sm-inline">Next</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                </li>
+              {% endif %}
+
+            </ul>
+          </nav>
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- <script>
+  $( document ).ready(function() {
+    console.log( "ready!" );
+});
+</script> -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const buttons = document.querySelectorAll(".view-btn");
+  const viewInput = document.getElementById("view-input");
+  const form = document.getElementById("view-form");
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", function() {
+      const view = this.getAttribute("data-view");
+      viewInput.value = view;
+      const pageInput = form.querySelector('input[name="page"]');
+      if (pageInput) pageInput.remove();
+      form.submit();
+    });
+  });
+});
+</script>
+
+<script>
+    function addToWishlist(elemet,product_id) {
+
+    //console.log(product_id)
+    $.ajax({
+        url: "{% url 'shop:add-or-remove-whishlist' %}",
+        method: 'POST',
+        data: {
+            product_id: product_id,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+
+        },
+        success: function (response) {
+            // do something with the response data
+            $(elemet).toggleClass('active')
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+            // handle the error case
+        }
+    });
+}
+</script>
+
+{% endblock extra_js %}

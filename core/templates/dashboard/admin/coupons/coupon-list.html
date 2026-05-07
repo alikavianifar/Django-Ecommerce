@@ -1,0 +1,128 @@
+{% extends 'dashboard/admin/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="tab-pane fade show active" id="coupons">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Coupons ({{total_items}})</h2>
+    <div class="header-actions">
+
+      <div class="search-box">
+        <div class="filter-item search-form">
+          <form method="get">
+            <div class="input-group">
+              <input type="text" class="form-control" name="q"
+                value="{{ request.GET.q|default_if_none:'' }}"
+                placeholder="Search by code..." aria-label="Search coupons">
+              <button style="padding-bottom: 44px;" class="btn search-btn btn-add-new" type="submit">
+                <i class="bi bi-search text-white"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <a href="{% url 'dashboard:admin:coupon-create' %}" class="btn btn-add-new pt-2">
+        <i class="bi bi-plus-circle"></i> Add Coupon
+      </a>
+
+      <a href="{% url 'dashboard:admin:export-coupons-csv' %}" class="btn btn-add-new pt-2" title="Export CSV">
+        <i class="bi bi-download"></i> CSV
+      </a>
+
+    </div>
+  </div>
+
+  <div class="table-responsive-xl w-100">
+    <table class="table table-hover text-center">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Code</th>
+          <th scope="col">Discount</th>
+          <th scope="col">Max Usage</th>
+          <th scope="col">Used</th>
+          <th scope="col">Expiration</th>
+          <th scope="col">Status</th>
+          <th scope="col">Created</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for coupon in object_list %}
+        <tr>
+          <td>{{forloop.counter}}</td>
+          <td><span class="badge bg-dark fs-6">{{coupon.code}}</span></td>
+          <td><span class="fw-bold text-success">{{coupon.discount_percent}}%</span></td>
+          <td>{{coupon.max_limit_usage}}</td>
+          <td>{{coupon.used_by.count}}</td>
+          <td>
+            {% if coupon.expiration_date %}
+              {{coupon.expiration_date|date:"Y.m.d H:i"}}
+            {% else %}
+              <span class="text-muted">No expiry</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if coupon.expiration_date and coupon.expiration_date < now %}
+              <span class="badge bg-danger">Expired</span>
+            {% elif coupon.used_by.count >= coupon.max_limit_usage %}
+              <span class="badge bg-warning text-dark">Limit Reached</span>
+            {% else %}
+              <span class="badge bg-success">Active</span>
+            {% endif %}
+          </td>
+          <td>{{coupon.created_date|date:"Y.m.d"}}</td>
+          <td>
+            <div class="btn-group" role="group">
+              <a href="{% url 'dashboard:admin:coupon-edit' pk=coupon.pk %}" class="btn btn-sm border-0" title="Edit">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'dashboard:admin:coupon-delete' pk=coupon.pk %}" class="btn btn-sm border-0 text-danger" title="Delete">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-muted py-4">No coupons found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <section id="category-pagination" class="category-pagination section">
+    <div class="container">
+      <nav class="d-flex justify-content-center" aria-label="Page navigation">
+        <ul>
+          {% if page_obj.has_previous %}
+          <li>
+            <a href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-arrow-left"></i> Previous</a>
+          </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+              {% if num == page_obj.number %}
+                <li><a href="?page={{ num }}" class="active">{{ num }}</a></li>
+              {% else %}
+                <li><a href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+          <li>
+            <a href="?page={{ page_obj.next_page_number }}">Next <i class="bi bi-arrow-right"></i></a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

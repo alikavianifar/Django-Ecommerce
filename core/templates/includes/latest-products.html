@@ -1,0 +1,125 @@
+{% load static %}
+{% load humanize %}
+
+{% block extra_css %}
+<style>
+button.action-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+</style>
+{% endblock %}
+<section id="product-list" class="product-list section">
+
+  <div class="container isotope-layout" data-aos="fade-up" data-aos-delay="100" data-default-filter="*"
+    data-layout="masonry" data-sort="original-order">
+
+    <div class="row product-container isotope-container" data-aos="fade-up" data-aos-delay="200">
+
+      <!-- Product Item 1 -->
+      {% for latest_product in latest_products %}
+      <div class="col-md-6 col-lg-3 product-item isotope-item">
+        <div class="product-card">
+          <div class="product-image">
+            {% if latest_product.is_discounted %}
+            <span class="badge">Sale</span>
+            {% endif %}
+            <img src="{{latest_product.image.url}}" alt="{{latest_product.title}}" class="img-fluid main-img">
+            {% with first_image=latest_product.images.first %}
+            {% if first_image %}
+            <img src="{{ first_image.file.url }}" alt="{{latest_product.title}}" class="img-fluid hover-img">
+            {% endif %}
+            {% endwith %}
+
+            <div class="product-overlay">
+              <!-- <a href="cart.html" class="btn-cart"><i class="bi bi-cart-plus"></i> Add to Cart</a> -->
+              <a href="javascript:void(0);" class="btn-cart" onclick="addToCart('{{ latest_product.id }}')"><i class="bi bi-cart-plus"></i> Add to Cart</a>
+
+              <div class="product-actions">
+
+                {% if request.user.is_authenticated %}
+
+                  <button type="button" onclick="addToWishlist(this, '{{latest_product.id}}')" 
+                  class="whishlist-btn {% if latest_product.id in wishlist_items %} active {% endif %}">
+                    <i class="bi bi-heart"></i>
+                  </button>
+
+                  <button type="button" class="action-btn">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button type="button" class="action-btn">
+                    <i class="bi bi-arrow-left-right"></i>
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="product-info">
+            <h5 class="product-title"><a
+                href="{% url 'shop:product-details' slug=latest_product.slug %}">{{latest_product.title}}</a></h5>
+            <div class="product-price">
+              {% if latest_product.is_discounted %}
+              <span class="current-price">${{latest_product.get_price|intcomma}}</span>
+              <span class="old-price">${{latest_product.price|intcomma}}</span>
+              {% else %}
+              <span class="original-price-category">${{ latest_product.price|intcomma }}</span>
+              {% endif %}
+            </div>
+            <div class="product-rating">
+              {% for i in "12345" %}
+                {% if forloop.counter <= latest_product.full_stars %}
+                    <i class="bi bi-star-fill text-warning"></i>
+                {% elif forloop.counter == latest_product.full_stars|add:1 and latest_product.has_half_star %}
+                    <i class="bi bi-star-half text-warning"></i>
+                {% else %}
+                    <i class="bi bi-star text-warning"></i>
+                {% endif %}
+              {% endfor %}
+              <span class="rating-count">({{latest_product.avg_rate}})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      <!-- End Product Item -->
+
+    </div>
+
+    <div class="text-center mt-3" data-aos="fade-up">
+      <a href="{% url 'shop:products' %}" class="view-all-btn">View All Products <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+  </div>
+
+</section>
+
+{% block extra_js %}
+<script>
+    function addToWishlist(elemet,product_id) {
+
+    //console.log(product_id)
+    $.ajax({
+        url: "{% url 'shop:add-or-remove-whishlist' %}",
+        method: 'POST',
+        data: {
+            product_id: product_id,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+
+        },
+        success: function (response) {
+            // do something with the response data
+            $(elemet).toggleClass('active')
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+            // handle the error case
+        }
+    });
+}
+</script>
+
+{% endblock extra_js %}

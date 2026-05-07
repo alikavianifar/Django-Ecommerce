@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="order-confirmation" class="order-confirmation section">
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+    <div class="order-confirmation-1">
+      <div class="next-steps text-center p-4" data-aos="fade-up" data-aos-delay="250">
+        <h3>Check your inbox</h3>
+        <p>We sent a verification link to your email address. <strong>Click it to activate your account.</strong></p>
+        <div class="tracking-info mb-4">
+          <i class="bi bi-link me-2"></i>The link expires in 24 hours.
+        </div>
+        <div class="action-buttons">
+          <a href="{% url 'accounts:verify-email-resend' %}" class="btn btn-primary me-3 mb-2 mb-md-0">
+            <i class="bi bi-bag me-2"></i>Resend link
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

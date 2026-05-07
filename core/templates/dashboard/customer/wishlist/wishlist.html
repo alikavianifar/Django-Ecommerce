@@ -1,0 +1,114 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Wishlist Tab -->
+<div class="section-header" data-aos="fade-up">
+  <h2>My Wishlist ({{total_items}})</h2>
+</div>
+
+<div class="wishlist-grid">
+  <!-- Wishlist Item 1 -->
+   {% for object in object_list %}
+  <div class="wishlist-card" data-aos="fade-up" data-aos-delay="100">
+    <div class="wishlist-image">
+      <img src="{{object.product.image.url}}" alt="Product" loading="lazy">
+
+      <form action="{% url 'dashboard:customer:wishlist-delete' pk=object.pk %}" method="post">
+        {% csrf_token %}
+        <button class="btn-remove" type="submit" aria-label="Remove from wishlist">
+          <i class="bi bi-trash"></i>
+        </button>
+      </form>
+      {% if object.product.is_discounted %}
+      <div class="sale-badge">-{{object.product.discount}}%</div>
+      {% endif %}
+    </div>
+    <div class="wishlist-content">
+      <h4 class="product-content"><a href="{% url 'shop:product-details' slug=object.product.slug %}">{{ object.product.title }}</a></h4>
+      <div class="product-meta">
+        <div class="rating">
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-half"></i>
+          <span>(4.5)</span>
+        </div>
+        <div class="price">
+          {% if object.product.is_discounted %}
+          <span class="current">${{object.product.get_price}}</span>
+          <span class="original">${{object.product.price}}</span>
+          {% else %}
+          <span class="current">${{object.product.get_price}}</span>
+          {% endif %}
+        </div>
+      </div>
+      <button type="button" class="btn-add-cart" onclick="addToCart('{{object.product.id}}')">Add to Cart</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+      
+      <section id="category-pagination" class="category-pagination section">
+        <div class="container">
+          <nav class="d-flex justify-content-center" aria-label="Page navigation">
+            <ul>
+
+              {# Previous Page #}
+              {% if page_obj.has_previous %}
+                <li>
+                  <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                    <i class="bi bi-arrow-left"></i>
+                    <span class="d-none d-sm-inline">Previous</span>
+                  </a>
+                </li>
+              {% endif %}
+
+              {# Show first page and ellipsis if needed #}
+              {% if page_obj.number > 3 %}
+                <li><a href="?page=1">1</a></li>
+                {% if page_obj.number > 4 %}
+                  <li class="ellipsis">...</li>
+                {% endif %}
+              {% endif %}
+
+              {# Pages around current page #}
+              {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                  {% if num == page_obj.number %}
+                    <li><a href="?page={{ num }}&view={{ view_mode }}" class="active">{{ num }}</a></li>
+                  {% else %}
+                    <li><a href="?page={{ num }}&view={{ view_mode }}">{{ num }}</a></li>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              {# Show ellipsis and last page if needed #}
+              {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                  <li class="ellipsis">...</li>
+                {% endif %}
+                <li><a href="?page={{ page_obj.paginator.num_pages }}&view={{ view_mode }}">{{ page_obj.paginator.num_pages }}</a></li>
+              {% endif %}
+
+              {# Next Page #}
+              {% if page_obj.has_next %}
+                <li>
+                  <a href="?page={{ page_obj.next_page_number }}&view={{ view_mode }}" aria-label="Next page">
+                    <span class="d-none d-sm-inline">Next</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                </li>
+              {% endif %}
+
+            </ul>
+          </nav>
+        </div>
+      </section>
+      {% endif %}
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Addresses Tab -->
+<div class="" id="addresses">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Edit Address</h2>
+  </div>
+
+  <div class="settings-content">
+    <!-- Security Settings -->
+    <div class="settings-section" data-aos="fade-up" data-aos-delay="200">
+
+      <form action="{% url 'dashboard:customer:address-edit' pk=object.pk %}" method="post" class="settings-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="address">Street Address</label>
+          {{form.address}}
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-md-4 form-group">
+            <label class="form-label" for="city">City</label>
+            {{form.city}}
+          </div>
+          <div class="col-md-4 form-group">
+            <label class="form-label" for="state">State</label>
+            {{form.state}}
+          </div>
+          <div class="col-md-4 form-group">
+            <label class="form-label" for="zip">ZIP Code</label>
+            {{form.zip_code}}
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn-save">Edit Address</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

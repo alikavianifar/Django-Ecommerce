@@ -1,0 +1,47 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Addresses Tab -->
+<div class="" id="addresses">
+  <div class="section-header" data-aos="fade-up">
+    <h2>My Addresses</h2>
+    <div class="header-actions">
+      <a class="btn btn-add-new pt-2" href="{% url 'dashboard:customer:address-create' %}"><i
+          class="bi bi-plus-lg"></i>New Address</a>
+    </div>
+  </div>
+
+  <div class="addresses-grid">
+    <!-- Address Card -->
+    {% for object in object_list %}
+    <div class="address-card default" data-aos="fade-up" data-aos-delay="100">
+      <div class="card-header">
+        <h4>Home</h4>
+        <span class="default-badge">Default</span>
+      </div>
+      <div class="card-body">
+        <p class="address-text">{{object.address}}<br>{{object.state}}, {{object.city}}<br>{{object.zip_code}}</p>
+        <div class="contact-info">
+          <div><i class="bi bi-person"></i>{{object.user}}</div>
+          <div><i class="bi bi-telephone"></i>{{request.user.user_profile.phone_number}}</div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button type="button" class="btn-edit" onclick="window.location.href='{% url 'dashboard:customer:address-edit' pk=object.pk %}'">
+          <i class="bi bi-pencil"></i>
+          Edit
+        </button>
+
+        <button type="button" class="btn-remove" onclick="window.location.href='{% url 'dashboard:customer:address-delete' pk=object.pk %}'">
+          <i class="bi bi-trash"></i>
+          Remove
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

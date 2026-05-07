@@ -1,0 +1,490 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+{% load shop_tags %}
+
+{% block title %}Sales Invoice — Order #{{ object.id }}{% endblock title %}
+
+{% block extra_css %}
+<style>
+  .invoice-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .invoice-document {
+    background: var(--surface-color, #fff);
+    border: 1px solid color-mix(in srgb, var(--accent-color), transparent 85%);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  .invoice-document .invoice-topbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.75rem 2rem;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent-color), transparent 92%) 0%,
+      color-mix(in srgb, var(--accent-color), transparent 97%) 100%
+    );
+    border-bottom: 3px solid var(--accent-color);
+  }
+
+  .invoice-document .brand-block .invoice-kind {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--default-color), transparent 35%);
+    margin-bottom: 0.35rem;
+  }
+
+  .invoice-document .brand-block h1 {
+    font-size: 1.65rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: var(--heading-color);
+  }
+
+  .invoice-document .brand-block .meta-line {
+    font-size: 0.875rem;
+    color: color-mix(in srgb, var(--default-color), transparent 20%);
+    margin: 0;
+  }
+
+  .invoice-document .invoice-ids {
+    text-align: right;
+  }
+
+  .invoice-document .invoice-ids .inv-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .invoice-document .invoice-ids dl {
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+  }
+
+  .invoice-document .invoice-ids dt {
+    display: inline;
+    color: color-mix(in srgb, var(--default-color), transparent 35%);
+    font-weight: 500;
+  }
+
+  .invoice-document .invoice-ids dd {
+    display: inline;
+    margin: 0 0 0 0.35rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .invoice-body {
+    padding: 2rem;
+  }
+
+  .invoice-parties {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 767px) {
+    .invoice-parties {
+      grid-template-columns: 1fr;
+    }
+    .invoice-document .invoice-ids {
+      text-align: left;
+    }
+  }
+
+  .invoice-party h2 {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--default-color), transparent 40%);
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+  }
+
+  .invoice-party .party-name {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--heading-color);
+  }
+
+  .invoice-party address {
+    font-style: normal;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--default-color);
+    margin: 0;
+  }
+
+  .invoice-party .party-contact {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .invoice-party .seller-tagline {
+    font-size: 0.8rem;
+    color: color-mix(in srgb, var(--default-color), transparent 25%);
+    margin-top: 0.5rem;
+  }
+
+  .invoice-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  .invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .invoice-table thead th {
+    text-align: left;
+    padding: 0.85rem 1rem;
+    background: color-mix(in srgb, var(--accent-color), transparent 94%);
+    color: var(--heading-color);
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--accent-color);
+  }
+
+  .invoice-table thead th.num,
+  .invoice-table tbody td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .invoice-table tbody td {
+    padding: 1rem;
+    vertical-align: top;
+    border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+  }
+
+  .invoice-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .invoice-table .line-title {
+    font-weight: 600;
+    color: var(--heading-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .invoice-table .line-sku {
+    font-size: 0.8rem;
+    color: color-mix(in srgb, var(--default-color), transparent 35%);
+  }
+
+  .invoice-table .line-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--default-color), transparent 88%);
+  }
+
+  .invoice-totals {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+  }
+
+  .invoice-totals table {
+    width: 100%;
+    max-width: 320px;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .invoice-totals tr td {
+    padding: 0.45rem 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .invoice-totals tr td:first-child {
+    color: color-mix(in srgb, var(--default-color), transparent 15%);
+  }
+
+  .invoice-totals tr td:last-child {
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .invoice-totals tr.grand td {
+    padding-top: 0.85rem;
+    margin-top: 0.5rem;
+    border-top: 2px solid var(--accent-color);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--accent-color);
+  }
+
+  .invoice-notes {
+    padding: 1.25rem 1.5rem;
+    background: color-mix(in srgb, var(--accent-color), transparent 96%);
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: color-mix(in srgb, var(--default-color), transparent 10%);
+    margin-bottom: 1.5rem;
+  }
+
+  .invoice-notes strong {
+    color: var(--heading-color);
+  }
+
+  .invoice-footer-legal {
+    font-size: 0.75rem;
+    color: color-mix(in srgb, var(--default-color), transparent 40%);
+    line-height: 1.5;
+    text-align: center;
+    padding: 0 1rem 1.5rem;
+  }
+
+  .invoice-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.25rem 2rem 2rem;
+    border-top: 1px dashed color-mix(in srgb, var(--default-color), transparent 88%);
+  }
+
+  .invoice-actions .btn-print-invoice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  @media print {
+  @page {
+    size: A3;
+    margin: 0;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    overflow: hidden; 
+  }
+
+  body.index-page {
+    background: #fff !important;
+  }
+
+  .no-print,
+  #header,
+  #footer,
+  .footer,
+  .scroll-top,
+  #preloader,
+  .mobile-menu,
+  .account .col-lg-3,
+  .account .sidebar,
+  nav#navmenu,
+  .header-nav,
+  .header-actions,
+  .invoice-actions {
+    display: none !important;
+  }
+
+  .account .col-lg-9,
+  .account .content-area,
+  .account .tab-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .account .row.g-4 {
+    margin: 0 !important;
+  }
+
+  .invoice-document {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 10mm;
+  }
+
+  .invoice-table tbody tr {
+    break-inside: avoid;
+  }
+
+  .invoice-document:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+}
+
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="orders-grid invoice-wrap">
+  <div class="invoice-document" id="invoice-root">
+    <div class="invoice-topbar">
+      <div class="brand-block">
+        <p class="invoice-kind">Commercial document</p>
+        <h1>Sales Invoice</h1>
+        <p class="meta-line">Original copy — retain for your records</p>
+      </div>
+      <div class="invoice-ids">
+        <dl>
+          <dt>Order ID</dt>
+        </dl>
+        <div class="inv-number"># ORD{{ object.user.id }}-{{ object.created_date|date:"dmy-Hi" }}-{{ object.id }}</div>
+        <dl>
+          <dt>Invoice date</dt>
+          <dd>{{ object.created_date|date:"F j, Y" }}</dd>
+        </dl>
+        
+        {% if object.stripe_payment_intent_id %}
+        <dl>
+          <dt>Payment ref.</dt>
+          <dd>…{{ object.stripe_payment_intent_id|slice:"-8:" }}</dd>
+        </dl>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="invoice-body">
+      <div class="invoice-parties">
+        <div class="invoice-party">
+          <h2>Seller</h2>
+          <div class="party-name">E-Commerce Store</div>
+          <address>
+            Sales &amp; billing department<br>
+            Support via website contact page
+          </address>
+          <p class="seller-tagline">This invoice is issued for goods sold through our online store.</p>
+        </div>
+        <div class="invoice-party">
+          <h2>Bill to</h2>
+          <div class="party-name">{{ object.user.user_profile.get_fullname }}</div>
+          <address>
+            {{ object.get_full_address }}<br>
+            Postal / ZIP: {{ object.zip_code }}
+          </address>
+          <div class="party-contact">
+            <span class="text-muted">Email:</span> {{ object.user.email }}<br>
+            <span class="text-muted">Phone:</span> {{ object.user.user_profile.phone_number }}
+          </div>
+        </div>
+      </div>
+
+      <div class="invoice-table-wrap">
+        <table class="invoice-table" aria-label="Invoice line items">
+          <thead>
+            <tr>
+              <th style="width: 5px;">#</th>
+              <th>Description</th>
+              <th class="num" style="width: 72px;">Qty</th>
+              <th class="num" style="width: 110px;">Unit price</th>
+              <th class="num" style="width: 120px;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order_item in object.order_items.all %}
+            <tr>
+              <td class="num">{{ forloop.counter }}</td>
+              <td>
+                <div class="d-flex gap-3 align-items-start">
+                  {% if order_item.product.image %}
+                  <img class="line-thumb" src="{{ order_item.product.image.url }}" alt="" width="48" height="48" loading="lazy">
+                  {% endif %}
+                  <div>
+                    <div class="line-title">{{ order_item.product.title }}</div>
+                    <div class="line-sku">SKU: PRD-{{ order_item.product.id }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="num">{{ order_item.quantity }}</td>
+              <td class="num">${{ order_item.price }}</td>
+              <td class="num">${{ order_item.unit_price }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% comment %}Line amount: unit price × qty (matches model calculate_total_price){% endcomment %}
+      <div class="invoice-totals">
+        <table>
+          <tr>
+            <td>Subtotal</td>
+            <td>${{ object.calculate_total_price }}</td>
+          </tr>
+          <tr>
+            <td>Shipping</td>
+            <td>$0.00</td>
+          </tr>
+          <tr>
+            <td>Tax (10%)</td>
+            <td>${{ object.calculate_tax_price }}</td>
+          </tr>
+          {% if object.coupon %}
+          <tr>
+            <td>Coupon ({{ object.coupon.code }})</td>
+            <td>−{{ object.coupon.discount_percent }}%</td>
+          </tr>
+          {% endif %}
+          <tr class="grand">
+            <td>Total due</td>
+            <td>${{ object.total_price }}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="invoice-notes">
+        <strong>Payment status:</strong>
+        {% if object.status == 2 %}
+        Paid — thank you for your order.
+        {% else %}
+        See order status in your account.
+        {% endif %}
+        {% if object.stripe_session_id %}
+        <br><strong>Checkout session:</strong> reference on file (Stripe).
+        {% endif %}
+      </div>
+
+      <p class="invoice-footer-legal">
+        This document serves as a record of sale. Prices are shown in USD. Tax rate applied as displayed above.
+        For questions about this invoice, contact customer support with your order number # ORD{{ object.user.id }}-{{ object.created_date|date:"dmy-Hi" }}-{{ object.id }}.
+      </p>
+    </div>
+
+    <div class="invoice-actions no-print">
+      <a href="{% url 'dashboard:customer:orders'%}" class="btn btn-add-new btn-print-invoice">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        Back to order
+      </a>
+      <a href="#" class="btn btn-add-new btn-print-invoice" role="button" onclick="window.print(); return false;">
+        <i class="bi bi-printer" aria-hidden="true"></i>
+        Print invoice
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

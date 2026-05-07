@@ -1,0 +1,150 @@
+{% extends 'dashboard/admin/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="tab-pane fade show active" id="messages">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Messages ({{total_items}})</h2>
+    <div class="header-actions">
+
+      <a href="{% url 'dashboard:admin:export-messages-csv' %}" class="btn btn-add-new pt-2" title="Export CSV">
+        <i class="bi bi-download"></i> CSV
+      </a>
+
+      <div class="search-box">
+        <div class="filter-item search-form">
+          <form method="get">
+            {% if request.GET.status %}<input type="hidden" name="status" value="{{ request.GET.status }}">{% endif %}
+            <div class="input-group">
+              <input type="text" class="form-control" name="q"
+                value="{{ request.GET.q|default_if_none:'' }}"
+                placeholder="Search by name, email, subject..." aria-label="Search messages">
+              <button style="padding-bottom: 44px;" class="btn search-btn btn-add-new" type="submit">
+                <i class="bi bi-search text-white"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="dropdown">
+        <button class="filter-btn" data-bs-toggle="dropdown">
+            <i class="bi bi-funnel"></i>
+            <span>Filter</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item {% if not request.GET.status %}active{% endif %}"
+                   href="?{% for key, val in request.GET.items %}{% if key != 'status' %}{{ key }}={{ val }}&{% endif %}{% endfor %}">
+                   All Status
+                </a>
+            </li>
+            {% for value, label in status_choices %}
+            <li>
+                <a class="dropdown-item {% if request.GET.status == value|stringformat:'s' %}active{% endif %}"
+                   href="?{% for key, val in request.GET.items %}{% if key != 'status' %}{{ key }}={{ val }}&{% endif %}{% endfor %}status={{ value }}">
+                   {{ label }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="table-responsive-xl w-100">
+    <table class="table table-hover text-center">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Subject</th>
+          <th scope="col">Status</th>
+          <th scope="col">Date</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for msg in object_list %}
+        <tr class="{% if msg.status == 1 %}fw-bold{% endif %}">
+          <td>{{msg.id}}</td>
+          <td>
+            {% if msg.status == 1 %}
+              <i class="bi bi-circle-fill text-primary me-1" style="font-size: 0.5rem;"></i>
+            {% endif %}
+            {{msg.name}}
+          </td>
+          <td class="text-muted small">{{msg.email}}</td>
+          <td class="text-truncate" style="max-width: 250px;">{{msg.subject}}</td>
+          <td>
+            {% if msg.status == 1 %}
+              <span class="badge bg-primary">Unread</span>
+            {% elif msg.status == 2 %}
+              <span class="badge bg-info text-dark">Read</span>
+            {% elif msg.status == 3 %}
+              <span class="badge bg-success">Replied</span>
+            {% elif msg.status == 4 %}
+              <span class="badge bg-secondary">Archived</span>
+            {% endif %}
+          </td>
+          <td class="text-muted small">{{msg.created_date|date:"M d, Y H:i"}}</td>
+          <td>
+            <div class="btn-group" role="group">
+              <a href="{% url 'dashboard:admin:message-detail' pk=msg.pk %}" class="btn btn-sm border-0" title="View">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{% url 'dashboard:admin:message-delete' pk=msg.pk %}" class="btn btn-sm border-0 text-danger" title="Delete"
+                 onclick="return confirm('Delete this message?')">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-muted py-4">
+            <i class="bi bi-envelope-open" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-0">No messages yet.</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <section id="category-pagination" class="category-pagination section">
+    <div class="container">
+      <nav class="d-flex justify-content-center" aria-label="Page navigation">
+        <ul>
+          {% if page_obj.has_previous %}
+          <li>
+            <a href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-arrow-left"></i> Previous</a>
+          </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+              {% if num == page_obj.number %}
+                <li><a href="?page={{ num }}" class="active">{{ num }}</a></li>
+              {% else %}
+                <li><a href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+          <li>
+            <a href="?page={{ page_obj.next_page_number }}">Next <i class="bi bi-arrow-right"></i></a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

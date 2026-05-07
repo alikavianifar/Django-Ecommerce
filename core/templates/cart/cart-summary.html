@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Cart Section -->
+<section id="cart" class="cart section">
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row g-4">
+            <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
+                <div class="cart-items">
+                    <div class="cart-header d-none d-lg-block">
+                        <div class="row align-items-center gy-4">
+                            <div class="col-lg-6">
+                                <h5>Product ({{total_quantity}})</h5>
+                            </div>
+                            <div class="col-lg-2 text-center">
+                                <h5>Price</h5>
+                            </div>
+                            <div class="col-lg-2 text-center">
+                                <h5>Quantity</h5>
+                            </div>
+                            <div class="col-lg-2 text-center">
+                                <h5>Total</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for item in cart_items %}
+                    <!-- Cart Item 1 -->
+                    <div class="cart-item" data-aos="fade-up" data-aos-delay="100">
+                        <div class="row align-items-center gy-4">
+                            <div class="col-lg-6 col-12 mb-3 mb-lg-0">
+                                <div class="product-info d-flex align-items-center">
+                                    <div class="product-image">
+                                        <img src="{{item.product_obj.image.url}}" alt="Product" class="img-fluid"
+                                            loading="lazy">
+                                    </div>
+                                    <div class="product-details">
+                                        <h6><a class="product-title"
+                                                href="{% url 'shop:product-details' slug=item.product_obj.slug %}">{{item.product_obj.title}}</a>
+                                        </h6>
+                                        <div class="product-meta">
+                                            <!-- <span class="product-color">Color: Black</span>
+                                            <span class="product-size">Size: M</span> -->
+                                        </div>
+                                        <button class="remove-item" type="button" onclick="removeProduct('{{item.product_id}}')">
+                                            <i class="bi bi-trash"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-2 text-center">
+                                <div class="price-tag">
+                                    <span class="current-price">${{item.product_obj.get_price}}</span>
+                                </div>
+                            </div>
+                            <!-- <div class="col-12 col-lg-2 text-center">
+                                <div class="quantity-selector">
+                                    <button class="quantity-btn decrease">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+
+                                    <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1"
+                                        max="{{ item.product_obj.stock }}">
+
+                                    <button class="quantity-btn increase">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div> -->
+
+
+                            <div class="col-12 col-lg-2 text-center">
+                                <div class="quantity-selector">
+                                    <button class="quantity-btn decrease"
+                                        onclick="changeProductQuantity('{{ item.product_id }}', {{ item.quantity|add:'-1' }})">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+
+                                    <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1"
+                                        max="{{ item.product_obj.stock }}"
+                                        onchange="changeProductQuantity('{{ item.product_id }}', this.value)">
+
+                                    <button class="quantity-btn increase"
+                                        onclick="changeProductQuantity('{{ item.product_id }}', {{ item.quantity|add:'1' }})">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12 col-lg-2 text-center mt-3 mt-lg-3">
+                                <div class="item-total">
+                                    <span>${{item.total_price}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End Cart Item -->
+                    {% endfor %}
+
+                    <!-- <div class="cart-actions">
+                        <div class="row g-3">
+                            <div class="col-lg-6 col-md-6">
+                                <div class="coupon-form">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Coupon code">
+                                        <button class="btn btn-accent" type="button">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 text-md-end">
+                                <button class="btn btn-outline-accent me-2">
+                                    <i class="bi bi-arrow-clockwise"></i> Update
+                                </button>
+                                <button class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="cart-summary">
+                    <h4 class="summary-title">Order Summary</h4>
+
+                    <div class="summary-item">
+                        <span class="summary-label">Subtotal</span>
+                        <span class="summary-value">${{total_price}}</span>
+                    </div>
+
+                    <div class="summary-item shipping-item">
+                        <span class="summary-label">Shipping</span>
+                        <div class="shipping-options">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="shipping" id="standard" checked="">
+                                <label class="form-check-label" for="standard">
+                                    Standard Delivery - $4.99
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="shipping" id="express">
+                                <label class="form-check-label" for="express">
+                                    Express Delivery - $12.99
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="shipping" id="free">
+                                <label class="form-check-label" for="free">
+                                    Free Shipping (Orders over $300)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-label">Tax (10%)</span>
+                        <span class="summary-value">${{total_tax}}</span>
+                    </div>
+
+                    <div class="summary-item discount">
+                        <span class="summary-label">Discount</span>
+                        <span class="summary-value">-${{total_discount}}</span>
+                    </div>
+
+                    <div class="summary-total">
+                        <span class="summary-label">Total</span>
+                        <span class="summary-value">${{final_price}}</span>
+                    </div>
+
+                    {% if total_quantity != 0 %}
+                    <div class="checkout-button">
+                        <a href="{% url 'order:checkout' %}" class="btn btn-accent w-100">
+                            Proceed to Checkout <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="checkout-button">
+                        <button class="btn btn-accent w-100" disabled>
+                            Proceed to Checkout <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="continue-shopping">
+                        <a href="{% url 'shop:products' %}" class="btn btn-link w-100">
+                            <i class="bi bi-arrow-left"></i> Continue Shopping
+                        </a>
+                    </div>
+
+                    <div class="payment-methods">
+                        <p class="payment-title">We Accept</p>
+                        <div class="payment-icons">
+                            <i class="bi bi-credit-card-2-front"></i>
+                            <i class="bi bi-paypal"></i>
+                            <i class="bi bi-wallet2"></i>
+                            <i class="bi bi-apple"></i>
+                            <i class="bi bi-google"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section><!-- /Cart Section -->
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    function changeProductQuantity(product_id,quantity){
+        $.ajax({
+            url: "{%  url 'cart:session-update-product-quantity' %}",
+            method: 'POST',
+            data: {
+                product_id: product_id,
+                quantity: quantity,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+    
+            },
+            success: function (response) {
+                console.log(response);
+                window.location.reload();
+                // do something with the response data
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                // handle the error case
+            }
+        });
+    }
+    function removeProduct(product_id){
+        $.ajax({
+            url: "{%  url 'cart:session-remove-product' %}",
+            method: 'POST',
+            data: {
+                product_id: product_id,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+    
+            },
+            success: function (response) {
+                console.log(response);
+                window.location.reload();
+                // do something with the response data
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                // handle the error case
+            }
+        });
+    }
+</script>
+
+{% endblock %}

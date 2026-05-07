@@ -1,0 +1,77 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Settings Tab -->
+<div class="" id="settings">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Account Settings</h2>
+  </div>
+
+  <div class="settings-content">
+
+    <!-- Profile Image -->
+    <div class="settings-section" data-aos="fade-up">
+      <h3>Profile Image</h3>
+
+      <form action="{% url 'dashboard:customer:settings-profile-image' %}" method="post" enctype="multipart/form-data"
+        class="settings-form">
+        {% csrf_token %}
+
+        <div class="col-12 d-flex justify-content-center mt-3">
+          <div class="ratio ratio-1x1" style="width:150px;">
+            <img src="{{ request.user.user_profile.image.url }}" alt="Current Profile Photo"
+              class="rounded-circle img-thumbnail object-fit-cover">
+          </div>
+        </div>
+
+
+        <label for="profileImage" class="form-label">Choose a new image</label>
+        <div class="row">
+          <div class="col-md-9">
+            <input class="form-control form-control-override" type="file" id="profileImage" name="image"
+              accept="image/png, image/jpg, image/jpeg" required>
+          </div>
+
+          <div class="col-md-3 mt-1 form-buttons">
+            <button type="submit" class="btn-save">Save Profile Image</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="settings-section" data-aos="fade-up">
+      <h3>Personal Information</h3>
+
+      <form action="{% url 'dashboard:customer:settings-personal-information' %}" method="post" class="settings-form">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="firstName" class="form-label">First Name</label>
+            {{ form.first_name }}
+          </div>
+          <div class="col-md-6">
+            <label for="lastName" class="form-label">Last Name</label>
+            {{ form.last_name }}
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input class="form-control" value="{{user.email}}" disabled>
+          </div>
+          <div class="col-md-6">
+            <label for="phone" class="form-label">Phone</label>
+            {{ form.phone_number }}
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn-save">Save Changes</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

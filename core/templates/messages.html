@@ -1,0 +1,29 @@
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}"
+         style="padding: 20px;">
+      {{ message|safe }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% if form and form.errors %}
+  <div class="alert alert-danger" style="padding: 20px;">
+
+    <ul class="mb-0">
+      {% for field in form %}
+        {% for error in field.errors %}
+          <li>
+            <a href="#{{ field.id_for_label }}" class="text-decoration-none">
+              <strong>{{ field.label }}:</strong> {{ error }}
+            </a>
+          </li>
+        {% endfor %}
+      {% endfor %}
+
+      {% for error in form.non_field_errors %}
+        <li><strong>Error:</strong> {{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

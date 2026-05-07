@@ -1,0 +1,48 @@
+{% extends 'dashboard/customer/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Addresses Tab -->
+<div class="" id="addresses">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Add New Address</h2>
+  </div>
+
+  <div class="settings-content">
+    <!-- Security Settings -->
+    <div class="settings-section" data-aos="fade-up" data-aos-delay="200">
+
+      <form action="{% url 'dashboard:customer:address-create' %}" method="post" class="settings-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+        <div class="form-group">
+          <label class="form-label" for="address">Street Address</label>
+          <input type="text" class="form-control" name="address" id="address" placeholder="Street Address" required="">
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-md-4 form-group">
+            <label class="form-label" for="city">City</label>
+            <input type="text" name="city" class="form-control" id="city" placeholder="City" required="">
+          </div>
+          <div class="col-md-4 form-group">
+            <label class="form-label" for="state">State</label>
+            <input type="text" name="state" class="form-control" id="state" placeholder="State" required="">
+          </div>
+          <div class="col-md-4 form-group">
+            <label class="form-label" for="zip">ZIP Code</label>
+            <input type="text" name="zip_code" class="form-control" id="zip_code" placeholder="ZIP Code" required="">
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn-save">Add Address</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

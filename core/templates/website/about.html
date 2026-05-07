@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  /* Customizing tabs to match the site's accent and heading colors */
+  .custom-pills .nav-link {
+    color: var(--heading-color);
+    border-radius: 8px;
+    transition: all 0.3s;
+    margin-bottom: 5px;
+  }
+  .custom-pills .nav-link:hover {
+    background-color: color-mix(in srgb, var(--accent-color), transparent 95%);
+    color: var(--accent-color);
+  }
+  .custom-pills .nav-link.active {
+    background-color: var(--accent-color);
+    color: var(--contrast-color);
+  }
+  
+  /* Feature List styling using site colors */
+  .feature-list-icon {
+    color: var(--accent-color);
+    font-size: 1.25rem;
+    margin-right: 10px;
+  }
+  .feature-list-title {
+    color: var(--heading-color);
+    font-weight: 600;
+  }
+  
+  /* Tech Grid matching theme */
+  .tech-card {
+    background-color: var(--surface-color);
+    border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+    border-radius: 12px;
+    padding: 20px;
+    transition: 0.3s;
+  }
+  .tech-card:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transform: translateY(-3px);
+  }
+  .tech-card i {
+    color: var(--accent-color);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+  .tech-card span {
+    color: var(--heading-color);
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Hero & Introduction Section -->
+    <section id="about-2" class="about-2 section">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Header -->
+        <div class="text-center mb-5">
+          <span class="section-badge"><i class="bi bi-briefcase"></i> Project Overview</span>
+          <h2 class="about-title mt-3" style="font-size: 2.5rem;">Comprehensive E-Commerce Architecture</h2>
+          <p class="about-description mx-auto mt-3" style="max-width: 800px; font-size: 1.1rem;">
+            A production-ready, full-featured web application built with Django 4.2 LTS. This platform delivers a complete shopping experience from product browsing and cart management to Stripe payment processing with webhook verification, backed by robust administration and security protocols.
+          </p>
+        </div>
+
+        <!-- Core Architectural Pillars -->
+        <div class="row features-boxes gy-4 mt-4">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="feature-box">
+              <div class="icon-box">
+                <i class="bi bi-shield-check"></i>
+              </div>
+              <h3><a href="#">Robust Security</a></h3>
+              <p>Built-in CSRF/XSS protection, comprehensive rate limiting, strict SQL injection safeguards, and email-verified user accounts ensure enterprise-level safety.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-box">
+              <div class="icon-box">
+                <i class="bi bi-database"></i>
+              </div>
+              <h3><a href="#">Data Integrity</a></h3>
+              <p>Powered by PostgreSQL 15. Complex relational schemas handle everything from product catalogs to hierarchical order processing seamlessly.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="feature-box">
+              <div class="icon-box">
+                <i class="bi bi-credit-card-2-front"></i>
+              </div>
+              <h3><a href="#">Seamless Payments</a></h3>
+              <p>Deep Stripe checkout integration utilizing webhook listeners. Payments are asynchronously verified and order lifecycles are fully automated.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="500">
+            <div class="feature-box">
+              <div class="icon-box">
+                <i class="bi bi-gear-wide-connected"></i>
+              </div>
+              <h3><a href="#">DevOps Ready</a></h3>
+              <p>Fully Dockerized environment backed by an automated CI/CD pipeline executing over 85 unit tests on every push via GitHub Actions.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Deep Dive Features Section -->
+    <section class="section light-background py-5">
+      <div class="container" data-aos="fade-up">
+        
+        <div class="text-center mb-5">
+          <span class="section-badge"><i class="bi bi-list-check"></i> Platform Capabilities</span>
+          <h2 class="about-title mt-3" style="font-size: 2rem;">Comprehensive Feature Breakdown</h2>
+          <p class="about-description">A detailed look at the core modules that power this e-commerce ecosystem, based on the project's technical specifications.</p>
+        </div>
+
+        <div class="row align-items-start mt-4">
+          <div class="col-lg-4 mb-4">
+            <div class="nav flex-column nav-pills custom-pills shadow-sm p-3" style="background-color: var(--surface-color); border-radius: 12px;" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+              <button class="nav-link active text-start py-3" id="v-pills-customer-tab" data-bs-toggle="pill" data-bs-target="#v-pills-customer" type="button" role="tab">
+                <i class="bi bi-person-badge me-2"></i> Authentication & Users
+              </button>
+              <button class="nav-link text-start py-3" id="v-pills-shopping-tab" data-bs-toggle="pill" data-bs-target="#v-pills-shopping" type="button" role="tab">
+                <i class="bi bi-cart3 me-2"></i> Shopping & Checkout
+              </button>
+              <button class="nav-link text-start py-3" id="v-pills-admin-tab" data-bs-toggle="pill" data-bs-target="#v-pills-admin" type="button" role="tab">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboards & Management
+              </button>
+              <button class="nav-link text-start py-3" id="v-pills-tech-tab" data-bs-toggle="pill" data-bs-target="#v-pills-tech" type="button" role="tab">
+                <i class="bi bi-shield-lock me-2"></i> Security & DevOps
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-lg-8">
+            <div class="tab-content shadow-sm p-4 p-md-5" style="background-color: var(--surface-color); border-radius: 12px; min-height: 480px;" id="v-pills-tabContent">
+              
+              <!-- Tab 1: Authentication & Users -->
+              <div class="tab-pane fade show active" id="v-pills-customer" role="tabpanel">
+                <h4 class="mb-4 feature-list-title"><i class="bi bi-person-badge me-2" style="color: var(--accent-color);"></i>Authentication & Users</h4>
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Custom User Model</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Email-based authentication with distinct roles (Customer, Admin, Superuser), completely bypassing Django's default username requirement.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Email Verification</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Time-limited signed tokens (via Django Signer) are emailed to users upon registration. Accounts remain restricted until verified.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Password Management</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Complete email-based password recovery flow with custom HTML templates, plus secure in-dashboard password updates.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Session Cycling</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Session keys are automatically regenerated on login to prevent session fixation attacks, enhancing user security.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 2: Shopping & Checkout -->
+              <div class="tab-pane fade" id="v-pills-shopping" role="tabpanel">
+                <h4 class="mb-4 feature-list-title"><i class="bi bi-cart3 me-2" style="color: var(--accent-color);"></i>Shopping & Checkout</h4>
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Advanced Product Catalog</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Paginated listings with multi-field sorting, category/brand filters. Detail pages include GLightbox galleries, Drift.js zoom, and star ratings.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Session-Synced Cart</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Guest users utilize a session-based cart. Upon authentication, Django signals automatically synchronize session items with the database cart.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Coupons & Tax</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Percentage-based discount coupons with usage limits and expiry dates. Automatic 10% tax is calculated using precise Decimal arithmetic.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Stripe Checkout & Webhooks</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Secure redirect to Stripe Checkout. Server-side webhook verification handles payment success and automates order status updates.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 3: Dashboards -->
+              <div class="tab-pane fade" id="v-pills-admin" role="tabpanel">
+                <h4 class="mb-4 feature-list-title"><i class="bi bi-speedometer2 me-2" style="color: var(--accent-color);"></i>Dashboards & Management</h4>
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Admin Analytics Console</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Professional dashboard with KPI cards and Chart.js visualizations (revenue bar/line combos and order status doughnut charts).</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Full CRUD Management</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Complete admin interfaces for managing Products, Categories, Brands, Orders, Customers, Coupons, and moderating Reviews.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Customer Dashboard</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Personal hub featuring total spent metrics, order tracking timelines, downloadable invoices, multi-address book, and wishlist management.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">CSV Export Engine</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">One-click data export capabilities allowing admins to download Orders, Customers, Products, and Contact Messages directly to CSV.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 4: Security & Tech -->
+              <div class="tab-pane fade" id="v-pills-tech" role="tabpanel">
+                <h4 class="mb-4 feature-list-title"><i class="bi bi-shield-lock me-2" style="color: var(--accent-color);"></i>Security & DevOps</h4>
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Advanced Security</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">IP-based Rate Limiting (login, registration, coupons), explicit Order-by whitelists (SQLi prevention), and Anti-Enumeration techniques.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Environment Variables</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">All sensitive data and Stripe keys are strictly managed via decoupled `.env` files, keeping the public repository completely clean.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Automated Testing (CI)</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">Over 85 unit tests covering models, forms, views, and signals. Executed automatically on GitHub Actions for every pull request.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-check-circle-fill feature-list-icon mt-1"></i>
+                      <div>
+                        <h6 class="feature-list-title">Docker Containerisation</h6>
+                        <p style="color: var(--default-color); font-size: 0.9rem;">A three-service Docker Compose architecture orchestrating the Django app, PostgreSQL 15, and smtp4dev for seamless deployment.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Project Stats -->
+    <section id="stats" class="stats section">
+      <div class="container" data-aos="fade-up">
+        <div class="row text-center">
+          <div class="col-md-3 col-6 mb-4">
+            <h2 class="fw-bold display-4" style="color: var(--accent-color);"><span data-purecounter-start="0" data-purecounter-end="85" data-purecounter-duration="2" class="purecounter">0</span>+</h2>
+            <p class="text-uppercase small" style="color: var(--heading-color); font-weight: 600;">Unit Tests Passed</p>
+          </div>
+          <div class="col-md-3 col-6 mb-4">
+            <h2 class="fw-bold display-4" style="color: var(--accent-color);"><span data-purecounter-start="0" data-purecounter-end="6" data-purecounter-duration="2" class="purecounter">0</span></h2>
+            <p class="text-uppercase small" style="color: var(--heading-color); font-weight: 600;">Django Apps</p>
+          </div>
+          <div class="col-md-3 col-6 mb-4">
+            <h2 class="fw-bold display-4" style="color: var(--accent-color);"><span data-purecounter-start="0" data-purecounter-end="100" data-purecounter-duration="2" class="purecounter">0</span>%</h2>
+            <p class="text-uppercase small" style="color: var(--heading-color); font-weight: 600;">Secure Endpoints</p>
+          </div>
+          <div class="col-md-3 col-6 mb-4">
+            <h2 class="fw-bold display-4" style="color: var(--accent-color);"><span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="2" class="purecounter">0</span>+</h2>
+            <p class="text-uppercase small" style="color: var(--heading-color); font-weight: 600;">Tech Integrations</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technology Stack Icons -->
+    <section class="section">
+      <div class="container" data-aos="fade-up">
+        <div class="text-center mb-5">
+          <h2 class="about-title" style="font-size: 2rem;">Powered by Modern Tools</h2>
+          <p class="about-description">The technologies and libraries that make this platform possible.</p>
+        </div>
+
+        <div class="row justify-content-center g-4 text-center">
+          {% for tech in tech_stack %}
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <div class="tech-card h-100">
+              <i class="bi {{ tech.icon }} d-block"></i>
+              <span class="d-block">{{ tech.name }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+{% endblock %}

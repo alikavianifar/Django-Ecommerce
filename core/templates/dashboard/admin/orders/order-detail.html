@@ -1,0 +1,128 @@
+{% extends 'dashboard/admin/base.html' %}
+{% load static %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="orders-grid">
+    <!-- Order Card 1 -->
+    <div class="order-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="order-header">
+            <div class="order-id">
+                <span class="label">Order ID:</span>
+                <span class="value"># ORD{{object.user.id}}-{{ object.created_date|date:"dmy-Hi" }}-{{ object.id
+                    }}</span>
+            </div>
+            <div class="order-date">{{object.created_date}}</div>
+        </div>
+        <div class="order-content">
+            <div class="product-grid">
+                {% for order_item in object.order_items.all %}
+                <img src="{{order_item.product.image.url}}" alt="Product" loading="lazy">
+                {% endfor %}
+            </div>
+            <div class="order-info">
+                <div class="info-row">
+                    <span>Status</span>
+                    {% if object.status == 2 %}
+                    <span class="status delivered">Success</span>
+                    {% elif object.status == 1 %}
+                    <span class="status processing">Pending</span>
+                    {% else %}
+                    <span class="status cancelled">Failed</span>
+                    {% endif %}
+                </div>
+                <div class="info-row">
+                    <span>Items</span>
+                    <span>{{object.order_items.count}} items</span>
+                </div>
+                <div class="info-row">
+                    <span>Total</span>
+                    <span class="price">${{object.total_price}}</span>
+                </div>
+            </div>
+        </div>
+        <hr>
+
+
+        <!-- Order Details -->
+        <div class="order-details">
+            <div class="details-content">
+                <div class="detail-section">
+                    <h5>Order Information</h5>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Payment Method</span>
+                            <span class="value">Credit Card (**** 4589)</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Shipping Method</span>
+                            <span class="value">Express Delivery (2-3 days)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h5>Items ({{object.order_items.count}})</h5>
+                    <div class="order-items">
+                        {% for order_item in object.order_items.all %}
+                        <div class="item">
+                            {{forloop.counter}}
+                            <img src="{{order_item.product.image.url}}" alt="Product" loading="lazy">
+                            <div class="item-info">
+                                <h6>{{order_item.product.title}}</h6>
+                                <div class="item-meta">
+                                    <span class="sku">SKU: PRD-{{order_item.product.id}}</span>
+                                    <span class="qty">Qty: {{order_item.quantity}}</span>
+                                </div>
+                            </div>
+                            <div class="item-price">${{order_item.price}}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h5>Price Details</h5>
+                    <div class="price-breakdown">
+                        <div class="price-row">
+                            <span>Subtotal</span>
+                            <span>${{ object.calculate_total_price }}</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Shipping</span>
+                            <span>$0.00</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Tax (10%)</span>
+                            <span>${{object.calculate_tax_price}}</span>
+                        </div>
+                        <div class="price-row">
+                            {% if object.coupon %}
+                            <span>Coupon</span>
+                            <span>%{{object.coupon.discount_percent}}</span>
+                            {% endif %}
+                        </div>
+                        <div class="price-row total">
+                            <span>Total</span>
+                            <span>${{object.total_price}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h5>Shipping Address</h5>
+                    <div class="address-info">
+                        <p>{{object.user.user_profile.get_fullname}}<br>{{object.get_full_address}}<br>Zip Code:
+                            {{object.zip_code}}</p>
+                        <p class="contact">{{object.user.user_profile.phone_number}}</p>
+                    </div>
+                </div>
+                {% if object.is_successful %}
+                    <a href="{% url 'dashboard:admin:order-invoice' pk=object.pk %}" class="btn btn-add-new pt-2">Invoice</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

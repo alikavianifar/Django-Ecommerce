@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
+</form> -->
+
+<!-- Login Register Section -->
+<section id="login-register" class="login-register section">
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+    <div class="row justify-content-center">
+      <div class="col-lg-5">
+        <div class="login-register-wraper">
+
+          <!-- Tab Navigation -->
+          <ul class="nav nav-tabs nav-tabs-bordered justify-content-center mb-4">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:login' %}">
+                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link active" href="{% url 'accounts:register' %}">
+                <i class="bi bi-person-plus me-1"></i>Register
+              </a>
+            </li>
+          </ul>
+
+          {% include 'messages.html' %}
+
+          <form action="{% url 'accounts:register' %}" method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+
+              <div class="col-sm-6">
+                <div class="mb-4">
+                  <label for="login-register-reg-firstname" class="form-label">First name</label>
+                  <input type="text" name="first_name" class="form-control" id="login-register-reg-firstname" required="">
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <div class="mb-4">
+                  <label for="login-register-reg-lastname" class="form-label">Last name</label>
+                  <input type="text" name="last_name" class="form-control" id="login-register-reg-lastname" required="">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="mb-4">
+                  <label for="login-register-reg-email" class="form-label">Email address</label>
+                  <input type="email" name="email" class="form-control" id="login-register-reg-email" required="">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="mb-4">
+                  <label for="login-register-reg-email" class="form-label">Phone number</label>
+                  <input type="tel" name="phone_number" class="form-control" id="login-register-reg-email" required="">
+                  <small>Enter the phone number in international format with country code. Example: +991234567890</small>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="mb-4">
+                  <label for="login-register-reg-password" class="form-label">Password</label>
+                  <input type="password" name="password" class="form-control" id="login-register-reg-password" required="">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="mb-4">
+                  <label for="login-register-reg-confirm-password" class="form-label">Confirm password</label>
+                  <input type="password" name="password_confirm" class="form-control" id="login-register-reg-confirm-password" required="">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="login-register-terms" required="">
+                  <label class="form-check-label" for="login-register-terms">
+                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</section><!-- /Login Register Section -->
+
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "dashboard/admin/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="section-header" data-aos="fade-up">
+  <h2>Edit Customer</h2>
+
+  <div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center mt-3">
+      <a href="{% url 'dashboard:admin:customer-detail' pk=object.pk %}" class="btn btn-add-new pt-2">
+        <i class="bi bi-arrow-left"></i> Back to details
+      </a>
+    </div>
+  </div>
+</div>
+
+<form action="." method="POST" novalidate>
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <!-- Left Column: Account Settings -->
+    <div class="col-lg-6">
+      <div class="card mb-4">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Account Settings</h5>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+
+            <!-- User Role -->
+            <div class="col-12">
+              <label for="{{ form.type.id_for_label }}" class="form-label fw-bold">
+                User Role
+              </label>
+              {{ form.type }}
+              <small class="text-muted d-block mt-1">
+                Changing to "Admin" will grant dashboard access and staff privileges.
+              </small>
+              {% if form.type.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.type.errors|striptags }}
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Active Status -->
+            <div class="col-md-6">
+              <div class="form-check form-switch py-2">
+                {{ form.is_active }}
+                <label class="form-check-label ms-2" for="{{ form.is_active.id_for_label }}">
+                  <strong>{{ form.is_active.label }}</strong>
+                </label>
+              </div>
+              <small class="text-muted">
+                Inactive users cannot log in.
+              </small>
+              {% if form.is_active.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.is_active.errors|striptags }}
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Verified Status -->
+            <div class="col-md-6">
+              <div class="form-check form-switch py-2">
+                {{ form.is_verified }}
+                <label class="form-check-label ms-2" for="{{ form.is_verified.id_for_label }}">
+                  <strong>{{ form.is_verified.label }}</strong>
+                </label>
+              </div>
+              <small class="text-muted">
+                Manually verify the user's email address.
+              </small>
+              {% if form.is_verified.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.is_verified.errors|striptags }}
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Account Info (Read-only) -->
+      <div class="card mb-4">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0"><i class="bi bi-info-circle"></i> Account Info</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label text-muted">Email</label>
+              <input type="text" class="form-control" value="{{ object.email }}" disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-muted">User ID</label>
+              <input type="text" class="form-control" value="#{{ object.pk }}" disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-muted">Joined</label>
+              <input type="text" class="form-control" value="{{ object.created_date|date:'Y.m.d - H:i' }}" disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-muted">Last Updated</label>
+              <input type="text" class="form-control" value="{{ object.updated_date|date:'Y.m.d - H:i' }}" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Profile Info -->
+    <div class="col-lg-6">
+      <div class="card mb-4">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0"><i class="bi bi-person"></i> Profile Information</h5>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+
+            <!-- Profile Image (read-only) -->
+            <div class="col-12 text-center mb-2">
+              <img src="{{ object.user_profile.image.url }}" alt="{{ object.user_profile.get_fullname }}"
+                   style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #e0e0e0;"
+                   loading="lazy">
+            </div>
+
+            <!-- First Name -->
+            <div class="col-md-6">
+              <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                First Name
+              </label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.first_name.errors|striptags }}
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Last Name -->
+            <div class="col-md-6">
+              <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                Last Name
+              </label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.last_name.errors|striptags }}
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Phone Number -->
+            <div class="col-12">
+              <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                Phone Number
+              </label>
+              {{ form.phone_number }}
+              <small class="text-muted d-block mt-1">
+                International format with country code (e.g. +991234567890)
+              </small>
+              {% if form.phone_number.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.phone_number.errors|striptags }}
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="d-flex justify-content-end mb-5 gap-2">
+    <a href="{% url 'dashboard:admin:customer-detail' pk=object.pk %}" class="btn btn-danger">
+      Cancel
+    </a>
+    <button type="submit" class="btn btn-add-new">
+      <i class="bi bi-check-lg"></i> Save Changes
+    </button>
+  </div>
+
+</form>
+
+{% endblock %}
