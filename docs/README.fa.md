@@ -1,6 +1,6 @@
 [ENGLISH](../README.md)
 
-# <div align="center">🛍️ فروشگاه اینترنتی جنگو</div>
+# <div align="center">فروشگاه اینترنتی جنگو</div>
 
 <div align="center">
 
