@@ -177,8 +177,8 @@ User cancels at Stripe      ──► Order marked as "failed"
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/alikavianifar/Ecommerce-Django.git
-cd Ecommerce-Django
+git clone https://github.com/alikavianifar/Django-Ecommerce.git
+cd Django-Ecommerce
 ```
 
 ### 🐳 Option 1: Docker (Recommended)
