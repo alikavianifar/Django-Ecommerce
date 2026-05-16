@@ -163,8 +163,8 @@
 
 ### کلون پروژه
 ```bash
-git clone https://github.com/alikavianifar/Ecommerce-Django.git
-cd Ecommerce-Django
+git clone https://github.com/alikavianifar/Django-Ecommerce.git
+cd Django-Ecommerce
 ```
 
 ### 🐳 روش ۱: داکر (پیشنهادی)
